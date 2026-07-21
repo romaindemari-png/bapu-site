@@ -4,8 +4,8 @@ const PATH={ci:"M50,0A50,50 0 1 1 50,100A50,50 0 1 1 50,0Z",sT:"M0,0H100A50,50 0
 const PRESET=("V.qTR V.qTL B.qBL O.qBR P.qTR P.sq O.qBR O.qBL B.sq O.sq R.qBR R.sq B.qBL R.qBR O.qBR B.qBL . V.sq B.qTL R.qTR O.sq B.sq O.qBR O.sq B.qTR B.sq V.qBL V.qBR B.sq B.sq P.qBR P.sq V.sq V.sq B.sq B.sq").trim().split(/\s+/).map(t=>t==="."?{s:"bl"}:{c:t.split(".")[0],s:t.split(".")[1]});
 const NS="http://www.w3.org/2000/svg",reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function inner(t){return t.s==="bl"?"":`<path d="${PATH[t.s]}" fill="${PAL[t.c]}"/>`}
-function fill(svg,box,U,live){const r=box.getBoundingClientRect();const cols=Math.max(3,Math.round(r.width/U)),rows=Math.max(1,Math.round(r.height/U));
- svg.setAttribute("viewBox",`0 0 ${cols*100} ${rows*100}`);svg.innerHTML="";
+function fill(svg,box,U,live){const r=box.getBoundingClientRect();const cols=Math.max(3,Math.round(r.width/U)),baseRows=Math.max(1,Math.round(r.height/U)),crop=(live&&innerWidth<=820)?1:0,rows=baseRows+crop;
+ svg.setAttribute("viewBox",`0 ${crop*100} ${cols*100} ${baseRows*100}`);svg.innerHTML="";
  for(let ri=0;ri<rows;ri++)for(let ci=0;ci<cols;ci++){const t=PRESET[(ri%6)*6+(ci%6)];const g=document.createElementNS(NS,"g");g.setAttribute("class","cell");
   g.setAttribute("transform",`translate(${ci*100} ${ri*100})`);g.innerHTML=inner(t);svg.appendChild(g);
   if(reduce)g.style.opacity=1;else setTimeout(()=>g.style.opacity=1,(ci+ri)*38+30);
