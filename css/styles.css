@@ -94,8 +94,9 @@ h2.qh{color:var(--p);font-size:clamp(30px,4.2vw,44px);margin-bottom:clamp(16px,2
 .pictos .overline::before,.pictos .overline::after{content:"";width:36px;height:1px;background:rgba(255,255,255,.35)}
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(24px,3.5vw,48px)}
 .picto{text-align:center;display:flex;flex-direction:column;align-items:center}
-.picto .ico{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;margin-bottom:22px;background:#fff;color:var(--ic);box-shadow:0 12px 26px -14px rgba(0,0,0,.3)}
-.picto .ico img{width:44px;height:44px;object-fit:contain;display:block}
+.picto .ico{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;overflow:hidden;margin-bottom:22px;background:#fff;color:var(--ic);box-shadow:0 12px 26px -14px rgba(0,0,0,.3)}
+.picto .ico picture{display:contents}
+.picto .ico img{width:44px;height:44px;object-fit:contain;display:block;margin:0}
 .picto h3{font-size:19px;margin-bottom:11px;letter-spacing:0;line-height:1.15;color:#fff}
 .picto p{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85);max-width:26ch}
 .pictos .bgshape{position:absolute;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none}
