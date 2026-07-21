@@ -37,7 +37,7 @@ nav.scrolled{border-color:var(--hair)}
 .btn-primary{background:var(--ink);color:#fff}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(59,59,59,.5)}
 .btn-outline{color:var(--ink);border:1.5px solid var(--hair)}.btn-outline:hover{border-color:var(--ink);transform:translateY(-2px)}
 .discover{margin-top:18px;display:inline-flex;gap:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none}.discover:hover{color:var(--ink)}
-.hero-panel{position:relative;align-self:stretch;overflow:hidden;cursor:pointer;min-height:340px}
+.hero-panel{position:relative;align-self:stretch;overflow:hidden;min-height:340px}
 .hero-panel svg{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hero-panel .cell{opacity:0;transition:opacity .5s ease}
 @media(max-width:820px){.hero{grid-template-columns:1fr;min-height:auto}.hero-left{padding-bottom:32px}.hero-panel{min-height:58vh;order:2}}
