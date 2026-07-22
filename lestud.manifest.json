@@ -1,0 +1,15 @@
+{
+  "manifest_version": "1.0",
+  "client": { "name": "BAPU", "slug": "bapu" },
+  "repo": { "github": "romaindemari-png/bapu-site", "default_branch": "main" },
+  "deploy": {
+    "provider": "netlify",
+    "site_name": "bapu-site",
+    "url": "https://bapu-site.netlify.app",
+    "publish_dir": "."
+  },
+  "offer": { "stage": "vitrine", "is_fork": false },
+  "template": { "base_repo": null, "family": "cabinet", "version": null },
+  "separation": null,
+  "instagram": null
+}
