@@ -11,6 +11,12 @@ picture{display:contents}
 :root{--v:#00AA3A;--b:#00AFF6;--o:#FF8F00;--r:#FF5243;--p:#FF8DA3;--ink:#3B3B3B;--paper:#fff;--bg:#F5F5F3;--pink:#FF94A4;--muted:#9A9A9A;--hair:#E4E3DF;
  --sans:"Elms",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
 *{margin:0;padding:0;box-sizing:border-box}html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+/* Lenis (scroll doux) */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-smooth [data-lenis-prevent]{overscroll-behavior:contain}
+.lenis.lenis-stopped{overflow:hidden}
+.lenis.lenis-scrolling iframe{pointer-events:none}
 body{background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:clip}
 :where(a,button,input,textarea,select,summary,iframe,[tabindex]):focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .wrap{max-width:1240px;margin:0 auto;padding-left:clamp(22px,5vw,52px);padding-right:clamp(22px,5vw,52px)}
