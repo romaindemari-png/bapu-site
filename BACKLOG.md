@@ -6,7 +6,7 @@ Ce qui reste à faire. Cocher au fur et à mesure. Un point = un chantier = un c
 
 - [ ] **Licence Neue Machina (Pangram Pangram)** — vérifier que le webfont **self-hosted** (`fonts/neuemachina-*.woff2`, y compris l'inktrap `NMI`) est **couvert par une licence web valide** AVANT livraison au client. C'est une police commerciale. *(Elms Sans est une Google Font — licence OK.)*
 - [ ] **Repasser `INFO.memoriser` à `true`** dans `js/main.js` avant la vraie mise en prod (actuellement `false` = mode démo, la popup revient à chaque chargement).
-- [ ] **Bascule sur le domaine `bapuaixmarseille.fr`** (config Netlify + DNS).
+- [ ] **Bascule sur le domaine `bapuaixmarseille.fr`** (config Netlify + DNS) + mettre à jour `deploy.url` dans `lestud.manifest.json`.
 - [ ] **Relecture juridique** des 2 pages légales (mentions légales + politique de confidentialité) **par un avocat**.
 - [ ] **Confirmer auprès du client** : directeur de la publication (actuellement *Dr Alain Gavaudan*) et référente données / RGPD (actuellement *Mme Marie Christine Perez*).
 
