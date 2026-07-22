@@ -243,3 +243,24 @@ html.has-banner body{padding-top:var(--banH)}
 .furg-line a{color:#fff;font-family:"NM";font-weight:500;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.55);white-space:nowrap}
 .furg-line a:hover{border-bottom-color:#fff}
 @media(prefers-reduced-motion:reduce){.info-pop,.info-card,.info-ban{transition:none}}
+/* ============ Pages de texte (mentions légales, confidentialité) — scopé .legal ============ */
+.nav-home{display:inline-flex;align-items:center}
+.legal{max-width:800px;margin:0 auto;padding:clamp(44px,8vw,88px) clamp(22px,5vw,52px) clamp(64px,10vw,120px)}
+.legal .lg-head{margin-bottom:clamp(36px,6vw,64px)}
+.legal .lg-over{font-family:var(--sans);font-weight:600;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:11px;margin-bottom:18px}
+.legal .lg-over::before{content:"";width:26px;height:1px;background:var(--hair)}
+.legal h1{font-family:"NM";font-weight:500;font-size:clamp(30px,5.4vw,52px);line-height:1.04;letter-spacing:-.02em;color:var(--ink);margin:0}
+.legal .lg-sub{font-size:14.5px;color:var(--muted);margin-top:16px}
+.legal .lg-body{font-size:clamp(15px,1.35vw,16px);line-height:1.7;color:#4a4a48;max-width:65ch}
+.legal .lg-body h2{font-family:"NM";font-weight:500;font-size:clamp(20px,2.5vw,26px);line-height:1.12;letter-spacing:-.01em;color:var(--ink);margin:clamp(42px,6vw,60px) 0 15px}
+.legal .lg-body h3{font-family:"NM";font-weight:500;font-size:clamp(16px,1.9vw,19px);line-height:1.2;color:var(--ink);margin:clamp(30px,4vw,42px) 0 10px}
+.legal .lg-body>h2:first-child,.legal .lg-body>h3:first-child{margin-top:0}
+.legal .lg-body p{margin:0 0 16px}
+.legal .lg-body strong{color:var(--ink);font-weight:600}
+.legal .lg-body a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--hair);transition:border-color .25s}
+.legal .lg-body a:hover{border-bottom-color:var(--ink)}
+.legal .lg-body ul{list-style:none;margin:2px 0 20px;padding:0}
+.legal .lg-body li{position:relative;padding-left:20px;margin-bottom:10px}
+.legal .lg-body li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--o)}
+.legal .lg-card{background:var(--bg);border-radius:16px;border-left:3px solid var(--o);padding:clamp(18px,3vw,26px) clamp(20px,3vw,28px);margin:6px 0 4px}
+.legal .lg-card p:last-child{margin-bottom:0}
