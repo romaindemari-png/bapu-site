@@ -148,6 +148,7 @@ h2.qh{color:var(--p);font-size:clamp(30px,4.2vw,44px);margin-bottom:clamp(16px,2
 .icols strong{color:var(--ink);font-weight:600}
 .addr{margin-bottom:18px}.addr .t{font-weight:600;color:var(--ink);font-size:14px;margin-bottom:3px}.addr .d{font-size:13.5px;color:#6a6a6a;line-height:1.45}
 .contact-btns{display:flex;flex-direction:column;gap:11px;align-items:flex-start}
+.contact-btns .callA,.contact-btns .sec2{min-width:240px;min-height:58px}
 .pill{display:inline-flex;align-items:center;gap:9px;border-radius:999px;padding:11px 20px;text-decoration:none;font-family:"NM";font-weight:500;font-size:15px;transition:transform .2s}
 .pill.tel{background:var(--v);color:#fff}.pill.mail{background:var(--ink);color:#fff}.pill:hover{transform:translateY(-1px)}
 @media(max-width:760px){.icols{grid-template-columns:1fr;gap:40px}}
