@@ -30,7 +30,7 @@ const INFO = {
 const PAL={V:"#00AA3A",B:"#00AFF6",O:"#FF8F00",R:"#FF5243",P:"#FF8DA3"};
 const PATH={ci:"M50,0A50,50 0 1 1 50,100A50,50 0 1 1 50,0Z",sT:"M0,0H100A50,50 0 0 1 0,0Z",sB:"M0,100H100A50,50 0 0 0 0,100Z",sL:"M0,0V100A50,50 0 0 0 0,0Z",sR:"M100,0V100A50,50 0 0 1 100,0Z",qTL:"M0,0L100,0A100,100 0 0 1 0,100Z",qTR:"M100,0L100,100A100,100 0 0 1 0,0Z",qBR:"M100,100L0,100A100,100 0 0 1 100,0Z",qBL:"M0,100L0,0A100,100 0 0 1 100,100Z",sq:"M0,0H100V100H0Z"};
 /* TA compo extraite au pixel (6x6). Répétée pour remplir le panneau. */
-const PRESET=("V.qTR V.qTL B.qBL O.qBR P.qTR P.sq O.qBR O.qBL B.sq O.sq R.qBR R.sq B.qBL R.qBR O.qBR B.qBL . V.sq B.qTL R.qTR O.sq B.sq O.qBR O.sq B.qTR B.sq V.qBL V.qBR B.sq B.sq P.qBR P.sq V.sq V.sq B.sq B.sq").trim().split(/\s+/).map(t=>t==="."?{s:"bl"}:{c:t.split(".")[0],s:t.split(".")[1]});
+const PRESET=("V.qTR V.qTL B.qBL O.qBR P.qTR P.sq O.qBR O.qBL B.sq O.sq R.qBR R.sq B.qBL R.qBR O.qBR B.qBL . V.sq B.qTL R.qTR O.sq B.sq O.qBR O.sq B.qTR B.sq V.qBL V.qBR B.sq B.qBL P.qBR P.sq V.sq V.sq B.qTR B.sq").trim().split(/\s+/).map(t=>t==="."?{s:"bl"}:{c:t.split(".")[0],s:t.split(".")[1]});
 const NS="http://www.w3.org/2000/svg",reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function inner(t){return t.s==="bl"?"":`<path d="${PATH[t.s]}" fill="${PAL[t.c]}"/>`}
 function fill(svg,box,U,live){const r=box.getBoundingClientRect();const mob=live&&innerWidth<=820,cols=mob?Math.max(3,Math.round(r.width/r.height)):Math.max(3,Math.round(r.width/U)),rows=mob?1:Math.max(1,Math.round(r.height/U));
