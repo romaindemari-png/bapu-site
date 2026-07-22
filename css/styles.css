@@ -69,6 +69,7 @@ nav.scrolled{border-color:var(--hair)}
 .lnk{font-family:"Elms";font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-decoration:none;position:relative;padding-bottom:3px;display:inline-flex;align-items:center;gap:7px}
 .lnk::after{content:"";position:absolute;left:0;bottom:0;height:1.5px;width:100%;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .28s}
 .lnk:hover::after{transform:scaleX(1)}
+.iarr{width:13px;height:13px;display:inline-block;vertical-align:-2px;flex:none}
 /* STRIPS full-bleed, tuiles carrées */
 .strip{width:100%;display:block;line-height:0}
 .strip svg{width:100%;height:clamp(84px,9vw,104px);display:block}
