@@ -121,6 +121,10 @@
    </div>
   </div>
   <div class="frule"></div>
+  <div class="furg" id="urgences">
+   <div class="flabel">En cas d’urgence</div>
+   <p class="furg-line"><strong>SAMU</strong> <a href="tel:15">15</a> &nbsp;·&nbsp; <strong>Sourds &amp; malentendant·e·s</strong> <a href="tel:114">114</a> &nbsp;·&nbsp; <strong>Urgences psychiatriques</strong> — Marseille, Timone <a href="tel:+33413429300">04 13 42 93 00</a> &nbsp;/&nbsp; Aix, Montperrin <a href="tel:+33442161610">04 42 16 16 10</a></p>
+  </div>
   <div class="fbottom">
    <div class="flinks"><a href="#">Mentions légales</a><a href="#">Confidentialité</a><a href="#">Accessibilité</a></div>
    <div class="fcopy">© 2026 BAPU — Tous droits réservés</div>
@@ -128,5 +132,35 @@
  </div>
 </footer>
 
+<div class="info-pop" id="infoPop" role="dialog" aria-modal="true" aria-labelledby="infoTitre">
+ <div class="info-overlay" data-close></div>
+ <div class="info-card">
+  <span class="info-quart" aria-hidden="true"></span>
+  <button class="info-x" type="button" data-close aria-label="Fermer le message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+  <div class="info-over"><span class="info-dot" aria-hidden="true"></span><span id="infoLabel">Information</span></div>
+  <h2 class="info-titre" id="infoTitre">Titre</h2>
+  <p class="info-texte" id="infoTexte"></p>
+  <div class="info-urg" id="infoUrg">
+   <div class="urg-t">En cas d’urgence médicale ou psychiatrique</div>
+   <ul class="urg-list">
+    <li><span class="urg-name">Urgences · sourds et malentendant·e·s</span><span class="urg-nums"><a class="urg-num" href="tel:15">15</a> · <a class="urg-num" href="tel:114">114</a></span></li>
+    <li><span class="urg-name">Marseille — Hôpital de la Timone</span><a class="urg-num" href="tel:+33413429300">04 13 42 93 00</a><span class="urg-adr">264 rue Saint-Pierre, 13005 — 24h/24, 7j/7</span></li>
+    <li><span class="urg-name">Marseille — Hôpital Nord</span><a class="urg-num" href="tel:+33491964956">04 91 96 49 56</a><span class="urg-adr">Chemin des Bourrely, 13015</span></li>
+    <li><span class="urg-name">Aix — Accueil soignant Montperrin</span><a class="urg-num" href="tel:+33442161610">04 42 16 16 10</a><span class="urg-adr">109 av. du Petit Barthélémy, 13100</span></li>
+    <li><span class="urg-name">Aix — Centre hospitalier du Pays d’Aix</span><a class="urg-num" href="tel:+33442339026">04 42 33 90 26</a><span class="urg-adr">Avenue des Tamaris, 13100 — 24h/24, 7j/7</span></li>
+   </ul>
+   <p class="urg-fin">Vous pouvez aussi vous rapprocher de votre médecin traitant.</p>
+  </div>
+  <button class="cta act info-ok" type="button" data-close>J’ai compris</button>
+ </div>
+</div>
+<div class="info-ban" id="infoBan" role="region" aria-label="Information importante">
+ <div class="wrap info-ban-in">
+  <span class="info-ban-dot" aria-hidden="true"></span>
+  <span class="info-ban-txt"><strong id="infoBanTitre"></strong> <span id="infoBanTexte"></span></span>
+  <a class="info-ban-link" href="#urgences">Voir les urgences <svg class="iarr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+  <button class="info-ban-x" type="button" data-close aria-label="Fermer le message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+ </div>
+</div>
 <script defer src="js/lenis.min.js"></script><script defer src="js/main.js"></script>
 <div class="grain"></div></body></html>
