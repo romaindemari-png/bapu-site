@@ -8,8 +8,8 @@
     "url": "https://bapu-site.netlify.app",
     "publish_dir": "."
   },
-  "offer": { "stage": "vitrine", "is_fork": false },
-  "template": { "base_repo": null, "family": "cabinet", "version": null },
+  "offer": { "stage": "lelab", "is_fork": false },
+  "template": { "base_repo": null, "family": "sante", "version": null },
   "separation": null,
   "instagram": null
 }
