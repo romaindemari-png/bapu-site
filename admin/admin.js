@@ -49,7 +49,8 @@ function toutesLesCartes(){
       lst.forEach(a => {
         if (!a.edit) return;
         cartes.push({ cle, type: bloc.type || cle, label: a.label || bloc.label, action: a.action || bloc.action || bloc.label,
-                      edit: a.edit, fichier: a.fichier || cle, picto: a.picto, sub: a.sub || '' });
+                      edit: a.edit, fichier: a.fichier || cle, picto: a.picto, sub: a.sub || '',
+                      emplacement: a.emplacement || null, aides: a.aides || {} });
       });
     }
   }
@@ -165,6 +166,12 @@ function telValide(num){
   const c = String(num).replace(/\D/g, '');
   return /^0\d{9}$/.test(c) || (/^\s*\+/.test(num) && c.length >= 8);
 }
+/* Début lisible d'un texte stocké (balises retirées), coupé au mot. */
+function debutDe(html, max = 70){
+  const t = String(html || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  if (t.length <= max) return t;
+  const c = t.slice(0, max); return c.slice(0, c.lastIndexOf(' ') > 30 ? c.lastIndexOf(' ') : max) + '…';
+}
 /* Saisie inchangée → valeur d'origine, à l'octet. */
 function garde(champ, origine){ return champ.value === champ.dataset.initial ? origine : champ.value.trim(); }
 
@@ -198,7 +205,10 @@ const EDITEURS = {
       const ta = champ('textarea', { rows: '3' }, origine ? origine.texte : '');
       const gras = interrupteur('En gras', origine ? origine.fort : false);
       const suppr = el('button', { type: 'button', class: 'ed-suppr', 'aria-label': 'Supprimer ce paragraphe', text: 'Supprimer' });
-      const bloc = el('div', { class: 'ed-carte' }, [el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num' }), suppr]), groupe('Texte', ta), gras.noeud]);
+      const repere = el('p', { class: 'ed-apercu' }, origine
+        ? [el('span', { text: 'Sur le site actuellement : ' }), el('q', { text: debutDe(origine.texte) })]
+        : [el('span', { text: 'Nouveau paragraphe — il s’ajoutera à la suite des autres.' })]);
+      const bloc = el('div', { class: 'ed-carte' }, [el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num' }), suppr]), repere, groupe('Texte', ta), gras.noeud]);
       const ligne = { origine, ta, gras: gras.box, bloc };
       suppr.addEventListener('click', () => {
         if (lignes.length <= 1){ showToast('Il faut au moins un paragraphe.'); return; }
@@ -207,7 +217,7 @@ const EDITEURS = {
       lignes.push(ligne); zone.appendChild(bloc); numeroter();
       return ligne;
     }
-    function numeroter(){ lignes.forEach((l, i) => { l.bloc.querySelector('.ed-num').textContent = 'Paragraphe ' + (i + 1); }); }
+    function numeroter(){ lignes.forEach((l, i) => { l.bloc.querySelector('.ed-num').textContent = (i === 0 ? '1er' : (i + 1) + 'e') + ' paragraphe'; }); }
     (liste.length ? liste : [null]).forEach(ajouter);
     const plus = el('button', { type: 'button', class: 'ed-ajout', text: '+ Ajouter un paragraphe' });
     plus.addEventListener('click', () => { ajouter(null).ta.focus(); signalerSaisie(); });
@@ -233,10 +243,12 @@ const EDITEURS = {
       const champsAdr = [0, 1].concat(adr.slice(2).map((_, i) => i + 2)).map(i =>
         champ('input', { type: 'text', autocomplete: 'off' }, adr[i] || ''));
       const tel = champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, s.telephone || '');
+      const lieu = s.nom || s.cle;
+      const aides = carte.aides || {};
       zone.appendChild(el('div', { class: 'ed-carte' }, [
-        el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: s.nom || s.cle })]),
-        ...champsAdr.map((c, i) => groupe('Adresse — ligne ' + (i + 1), c)),
-        groupe('Téléphone', tel, 'Format : 04 91 50 01 13 — il est mis à jour partout sur le site, lien d’appel compris.')
+        el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: lieu })]),
+        ...champsAdr.map((c, i) => groupe(lieu + ' — adresse, ligne ' + (i + 1), c, i === champsAdr.length - 1 ? aides.adresse : null)),
+        groupe(lieu + ' — téléphone', tel, [aides.telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' '))
       ]));
       return { site: s, champsAdr, tel, adr };
     });
@@ -350,12 +362,32 @@ function openEdit(carte){
   const ed = fab(carte, origine);
   edition = { carte, origine, lire: ed.lire, sale: false };
   document.getElementById('editTitre').textContent = carte.action;
-  document.getElementById('editSub').textContent = carte.sub;
+  document.getElementById('editSub').textContent = carte.emplacement ? '' : carte.sub;
+  document.getElementById('editSub').hidden = !!carte.emplacement;
+  rendreEmplacement(carte.emplacement);
   const corps = document.getElementById('editCorps');
   corps.textContent = '';
   corps.appendChild(ed.noeud);
   majBoutonPublier();
   showScreen('edit');
+  corps.querySelectorAll('textarea').forEach(ajusterHauteur);   // après affichage : scrollHeight vaut 0 sur un écran masqué
+}
+
+/* Encart « Où sur le site » — textes fournis par config.json (admin.emplacement). */
+function rendreEmplacement(e){
+  const zone = document.getElementById('editLieu');
+  zone.textContent = '';
+  zone.hidden = !e;
+  if (!e) return;
+  const ico = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  ico.setAttribute('viewBox', '0 0 24 24'); ico.setAttribute('aria-hidden', 'true');
+  ico.innerHTML = PICTOS.lieu;
+  zone.append(el('span', { class: 'lieu-ico' }, [ico]), el('div', { class: 'lieu-txt' }, [
+    el('p', { class: 'lieu-sur', text: 'Ce que vous modifiez sur le site' }),
+    el('p', { class: 'lieu-t', text: e.titre || '' }),
+    e.texte ? el('p', { class: 'lieu-p', text: e.texte }) : null,
+    e.ancre !== undefined ? el('a', { class: 'lieu-lien', href: '/' + (e.ancre || ''), target: '_blank', rel: 'noopener', text: 'Voir cet endroit sur le site ↗' }) : null
+  ]));
 }
 
 /* Modifié = ce qu'on écrirait diffère de ce qu'on a lu (une saisie invalide compte comme modifiée). */
@@ -453,5 +485,7 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-screen]');
   if (b) siModifie(() => { edition = null; showScreen(b.dataset.screen); });
 });
-document.addEventListener('input', e => { if (e.target.closest('#editCorps')) signalerSaisie(); });
+/* Les zones de texte grandissent avec leur contenu : tout le texte reste visible. */
+function ajusterHauteur(ta){ ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; }
+document.addEventListener('input', e => { if (e.target.matches('#editCorps textarea')) ajusterHauteur(e.target); if (e.target.closest('#editCorps')) signalerSaisie(); });
 document.addEventListener('change', e => { if (e.target.closest('#editCorps')) signalerSaisie(); });

@@ -19,7 +19,12 @@
           "edit": "accueil",
           "fichier": "textes",
           "picto": "texte",
-          "sub": "Bloc « Accueil » · prise de rendez-vous"
+          "sub": "Bloc « Accueil » · prise de rendez-vous",
+          "emplacement": {
+            "titre": "Section « Infos pratiques » — bloc « Accueil. »",
+            "texte": "En bas de la page d’accueil, sous le titre « Accueil. », juste avant les adresses. Ce sont les phrases qui expliquent comment prendre un premier rendez-vous.",
+            "ancre": "#infos"
+          }
         }
       },
       "coordonnees": {
@@ -34,7 +39,16 @@
           "edit": "coordonnees",
           "fichier": "coordonnees",
           "picto": "lieu",
-          "sub": "Marseille · Aix-en-Provence"
+          "sub": "Marseille · Aix-en-Provence",
+          "emplacement": {
+            "titre": "Adresses et numéros, partout sur le site",
+            "texte": "Chaque modification est reportée à tous les endroits où l’information apparaît.",
+            "ancre": "#infos"
+          },
+          "aides": {
+            "adresse": "Apparaît dans le bloc « Adresses. » (Infos pratiques) et dans le pied de page. La carte Google n’est pas modifiée ici.",
+            "telephone": "Apparaît sur les boutons d’appel (haut de page, « Prise de rendez-vous », « Contact ») et dans le pied de page, lien d’appel compris."
+          }
         }
       },
       "message": {
@@ -47,7 +61,11 @@
           "edit": "message",
           "fichier": "info",
           "picto": "message",
-          "sub": "Fermeture, information spéciale · popup ou bannière"
+          "sub": "Fermeture, information spéciale · popup ou bannière",
+          "emplacement": {
+            "titre": "Message d’information — popup ou bannière",
+            "texte": "S’affiche sur la page d’accueil, aux dates choisies : en fenêtre au centre de l’écran (popup) ou en bandeau en haut de la page (bannière)."
+          }
         }
       }
     },

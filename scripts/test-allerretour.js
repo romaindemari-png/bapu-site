@@ -120,6 +120,7 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   env = await publierEtAttendre();
   ok('message : fin avant début → refusé, rien envoyé', env === null);
   await ouvrir(); await ouvrirEdition('message');
+  await p.evaluate(() => { const a = document.querySelector('#editCorps input[type=checkbox]'); if (!a.checked) a.click(); });   // indépendant de l'état publié
   await saisirN('input[type=text]', 1, '');
   env = await publierEtAttendre();
   ok('message : actif sans titre → refusé, rien envoyé', env === null);
