@@ -86,4 +86,5 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
 
 - **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : un nouveau message = un nouvel `id`. Voir `README.md`.
 - **Contenus éditables** (textes Accueil, adresses, téléphones) : `_data/*.json` injectés par `js/lelab-sante-loader.js` via les marqueurs `cms-*` — ne pas retirer ces classes/ids du HTML.
+- **Libellés de l'admin (textes)** : chaque paragraphe de `_data/textes.json` porte un `role` ; le libellé vient de `config.json → admin.libelles[role]`. Paragraphe sans role → numérotation. Ne jamais revenir à un libellé par position (une suppression décalerait tous les libellés).
 - **Carte** (accueil) : chargement **au clic** (RGPD) — l'iframe Google n'est injectée qu'au clic sur « Afficher la carte ». Ne pas remettre d'iframe Google en dur.
