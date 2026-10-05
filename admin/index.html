@@ -99,7 +99,30 @@
       <div class="cards" id="siteCards"></div>
       <a class="site-link site-link--c" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
     </section>
+
+    <!-- ═══ ÉDITION (un éditeur par type de bloc, construit par admin.js) ═══ -->
+    <section class="screen" id="screen-edit" aria-labelledby="editTitre">
+      <button class="retour" type="button" data-screen="monsite">← Mon site</button>
+      <h1 class="screen-h" id="editTitre"></h1>
+      <p class="screen-p" id="editSub"></p>
+      <div id="editCorps"></div>
+      <div class="pied-publier">
+        <button class="btn btn--block" id="btnPublier" type="button" onclick="publier()" disabled>Publier les modifications</button>
+      </div>
+    </section>
   </main>
+
+  <!-- Confirmation : quitter un écran modifié -->
+  <div class="quitter" id="quitter" hidden role="dialog" aria-modal="true" aria-labelledby="quitterT">
+    <div class="quitter-boite">
+      <p class="quitter-t" id="quitterT">Quitter sans publier&nbsp;?</p>
+      <p class="quitter-p">Vos modifications ne sont pas encore en ligne. Elles seront perdues.</p>
+      <div class="quitter-btns">
+        <button class="btn btn--sec" type="button" onclick="confirmerQuitter(false)">Rester</button>
+        <button class="btn" type="button" onclick="confirmerQuitter(true)">Quitter</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ═══ NAV BAS (mobile) ═══ -->
   <nav class="nav-bas" aria-label="Navigation">
