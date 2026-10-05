@@ -1,0 +1,12 @@
+{
+  "actif": true,
+  "type": "popup",
+  "id": "fermeture-aout-2026",
+  "dateDebut": "2026-07-15",
+  "dateFin": "2026-08-28",
+  "label": "Information",
+  "titre": "Fermeture annuelle",
+  "texte": "Le BAPU Aix-Marseille sera <strong>fermé du 3 au 28 août inclus</strong>.",
+  "urgences": true,
+  "memoriser": true
+}
