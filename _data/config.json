@@ -1,0 +1,56 @@
+{
+  "plan": "lelab",
+  "famille": "sante",
+  "cabinet": {
+    "nom": "BAPU Aix-Marseille",
+    "slug": "bapu"
+  },
+  "blocs": {
+    "socle": {
+      "accueil": {
+        "label": "Textes d'accueil",
+        "action": "Modifier les textes d'accueil",
+        "type": "textes",
+        "actif": true,
+        "sections": [
+          "infos"
+        ],
+        "admin": {
+          "edit": "accueil",
+          "fichier": "textes",
+          "picto": "texte",
+          "sub": "Bloc « Accueil » · prise de rendez-vous"
+        }
+      },
+      "coordonnees": {
+        "label": "Adresses & téléphones",
+        "action": "Mettre à jour adresses et téléphones",
+        "type": "coordonnees",
+        "actif": true,
+        "sections": [
+          "infos"
+        ],
+        "admin": {
+          "edit": "coordonnees",
+          "fichier": "coordonnees",
+          "picto": "lieu",
+          "sub": "Marseille · Aix-en-Provence"
+        }
+      },
+      "message": {
+        "label": "Message d'info",
+        "action": "Gérer le message d'info",
+        "type": "message",
+        "actif": true,
+        "sections": [],
+        "admin": {
+          "edit": "message",
+          "fichier": "info",
+          "picto": "message",
+          "sub": "Fermeture, information spéciale · popup ou bannière"
+        }
+      }
+    },
+    "optionnels": {}
+  }
+}

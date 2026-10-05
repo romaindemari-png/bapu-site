@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex, nofollow">
+<title>LeLab — Votre espace</title>
+<link rel="stylesheet" href="admin.css">
+<!-- Cœur auth + lecture : copie à l'octet du master LeLab (voir son en-tête). -->
+<script src="lelab-auth.js"></script>
+<script src="admin.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    if (handleAuthHash()) return;   // lien d'invitation / récupération → écran "définir le mot de passe"
+    restoreSession();
+  });
+</script>
+</head>
+<body>
+
+<!-- ═══ LOGIN (passerelle Netlify Identity) — ids attendus par lelab-auth.js ═══ -->
+<div id="login-gate">
+  <img id="logo-login" src="assets/logo-lelab-noir.png" alt="LeLab" width="200" height="155">
+  <h1>Votre espace</h1>
+  <p>Connectez-vous pour modifier votre site.</p>
+  <form id="login-form" onsubmit="return customLogin(event)">
+    <input id="login-email" type="email" inputmode="email" autocomplete="username" placeholder="Email" required>
+    <input id="login-password" type="password" autocomplete="current-password" placeholder="Mot de passe" required>
+    <button class="btn btn--block" id="login-submit" type="submit">Se connecter →</button>
+    <p id="login-error" role="alert"></p>
+  </form>
+  <form id="setpw-form" onsubmit="return submitNewPassword(event)" style="display:none;">
+    <input id="setpw-password" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe (min. 10 caractères)" required>
+    <input id="setpw-confirm" type="password" autocomplete="new-password" placeholder="Confirmer le mot de passe" required>
+    <button class="btn btn--block" id="setpw-submit" type="submit">Activer mon compte →</button>
+    <p id="setpw-error" role="alert"></p>
+  </form>
+</div>
+
+<div class="app">
+  <!-- ═══ SIDEBAR (desktop) ═══ -->
+  <aside class="sidebar">
+    <div class="logo-wrap"><img src="assets/logo-lelab-blanc.png" alt="LeLab" width="112" height="87"></div>
+    <nav class="nav-list" aria-label="Navigation">
+      <button class="nav-item" data-screen="dashboard" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
+        <span class="nav-txt"><span class="nav-name">Accueil</span><span class="nav-sub">Vue d'ensemble</span></span>
+      </button>
+      <button class="nav-item" data-screen="monsite" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <span class="nav-txt"><span class="nav-name">Mon site</span><span class="nav-sub">Mon contenu</span></span>
+      </button>
+    </nav>
+    <div class="user-row">
+      <div class="av" aria-hidden="true"></div>
+      <div class="user-name"></div>
+      <button class="logout" type="button" onclick="doLogout()" title="Déconnexion" aria-label="Déconnexion">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.6 6.8a8 8 0 1 0 10.8 0"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══ TOPBAR (mobile) ═══ -->
+  <header class="topbar-m">
+    <img src="assets/logo-lelab-noir-h.png" alt="LeLab" width="120" height="38">
+    <div class="topbar-r">
+      <div class="av" aria-hidden="true"></div>
+      <button class="logout" type="button" onclick="doLogout()" title="Déconnexion" aria-label="Déconnexion">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.6 6.8a8 8 0 1 0 10.8 0"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- ═══ ACCUEIL ═══ -->
+    <section class="screen active" id="screen-dashboard" aria-labelledby="hello">
+      <p class="hello-date" id="helloDate"></p>
+      <h1 class="hello" id="hello"><strong>Bonjour<br><span id="helloName"></span>,</strong><br>que voulez-vous faire aujourd'hui&nbsp;?</h1>
+      <div class="tiles">
+        <button class="tile tile--site" type="button" data-screen="monsite">
+          <svg class="tile-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 8h10M7 11h6M9 20h6M12 16v4"/></svg>
+          <span class="tile-t">Modifier<br>mon site</span>
+          <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+        </button>
+        <div class="tile tile--etat" id="tileMessage" hidden>
+          <span class="etat-lbl">Message d'info</span>
+          <span class="etat-val" id="etatMessage"></span>
+          <span class="etat-sub" id="etatMessageSub"></span>
+        </div>
+      </div>
+      <a class="site-link" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
+    </section>
+
+    <!-- ═══ MON SITE ═══ -->
+    <section class="screen" id="screen-monsite" aria-labelledby="monsiteTitre">
+      <h1 class="screen-h" id="monsiteTitre">Mon site</h1>
+      <p class="screen-p">Modifiez le contenu de votre site. Après publication, comptez moins d'une minute avant de voir les changements en ligne.</p>
+      <div class="cards" id="siteCards"></div>
+      <a class="site-link site-link--c" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
+    </section>
+  </main>
+
+  <!-- ═══ NAV BAS (mobile) ═══ -->
+  <nav class="nav-bas" aria-label="Navigation">
+    <button class="nb-item" data-screen="dashboard" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+      <span>Accueil</span>
+    </button>
+    <button class="nb-item" data-screen="monsite" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>
+      <span>Mon site</span>
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="dev-badge">⚙ DEV — auth bypassée (localhost)</div>
+</body>
+</html>
