@@ -50,7 +50,8 @@ function toutesLesCartes(){
         if (!a.edit) return;
         cartes.push({ cle, type: bloc.type || cle, label: a.label || bloc.label, action: a.action || bloc.action || bloc.label,
                       edit: a.edit, fichier: a.fichier || cle, picto: a.picto, sub: a.sub || '',
-                      emplacement: a.emplacement || null, aides: a.aides || {} });
+                      emplacement: a.emplacement || null, aides: a.aides || {},
+                      libelles: Array.isArray(a.libelles) ? a.libelles : [] });
       });
     }
   }
@@ -201,7 +202,9 @@ const EDITEURS = {
     const liste = Array.isArray(donnee && donnee[cle]) ? donnee[cle] : [];
     const zone = el('div', { class: 'ed-liste' });
     const lignes = [];
-    function ajouter(origine){
+    /* Libellé de rôle (config.json → admin.libelles), attribué au chargement selon la position
+       et attaché au paragraphe : il le suit si un autre est supprimé. Sans libellé, numérotation. */
+    function ajouter(origine, libelle){
       const ta = champ('textarea', { rows: '3' }, origine ? origine.texte : '');
       const gras = interrupteur('En gras', origine ? origine.fort : false);
       const suppr = el('button', { type: 'button', class: 'ed-suppr', 'aria-label': 'Supprimer ce paragraphe', text: 'Supprimer' });
@@ -209,7 +212,7 @@ const EDITEURS = {
         ? [el('span', { text: 'Sur le site actuellement : ' }), el('q', { text: debutDe(origine.texte) })]
         : [el('span', { text: 'Nouveau paragraphe — il s’ajoutera à la suite des autres.' })]);
       const bloc = el('div', { class: 'ed-carte' }, [el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num' }), suppr]), repere, groupe('Texte', ta), gras.noeud]);
-      const ligne = { origine, ta, gras: gras.box, bloc };
+      const ligne = { origine, ta, gras: gras.box, bloc, libelle };
       suppr.addEventListener('click', () => {
         if (lignes.length <= 1){ showToast('Il faut au moins un paragraphe.'); return; }
         lignes.splice(lignes.indexOf(ligne), 1); bloc.remove(); numeroter(); signalerSaisie();
@@ -217,8 +220,8 @@ const EDITEURS = {
       lignes.push(ligne); zone.appendChild(bloc); numeroter();
       return ligne;
     }
-    function numeroter(){ lignes.forEach((l, i) => { l.bloc.querySelector('.ed-num').textContent = (i === 0 ? '1er' : (i + 1) + 'e') + ' paragraphe'; }); }
-    (liste.length ? liste : [null]).forEach(ajouter);
+    function numeroter(){ lignes.forEach((l, i) => { l.bloc.querySelector('.ed-num').textContent = l.libelle || ((i === 0 ? '1er' : (i + 1) + 'e') + ' paragraphe'); }); }
+    (liste.length ? liste : [null]).forEach((origine, i) => ajouter(origine, origine ? carte.libelles[i] : undefined));
     const plus = el('button', { type: 'button', class: 'ed-ajout', text: '+ Ajouter un paragraphe' });
     plus.addEventListener('click', () => { ajouter(null).ta.focus(); signalerSaisie(); });
     return {
