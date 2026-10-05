@@ -30,7 +30,10 @@ index.html                          Accueil (page unique à ancres : #presentati
 mentions-legales.html               Page de texte
 politique-de-confidentialite.html   Page de texte
 css/styles.css                      Tout le CSS
-js/main.js                          Tout le JS (+ objet INFO de config, voir ci-dessous)
+js/main.js                          Tout le JS (lit _data/info.json pour le message d'info)
+js/lelab-sante-loader.js            Loader LeLab : injecte _data/textes + coordonnees (marqueurs cms-*)
+_data/                              Contenus édités depuis l'admin (textes, coordonnees, info)
+netlify/functions/save-data.js      Sauvegarde admin → GitHub via Git Gateway (copie du master LeLab)
 js/lenis.min.js                     Lenis (ne pas modifier)
 fonts/  img/                        Polices .woff2, images .webp/.png
 ```
@@ -39,28 +42,27 @@ fonts/  img/                        Polices .woff2, images .webp/.png
 
 ### Message d'information (popup ou bandeau)
 
-Tout se pilote depuis l'objet **`const INFO`** en haut de **`js/main.js`** — un seul endroit à éditer :
+Le message se règle dans **`_data/info.json`**, édité par le client depuis l'admin LeLab (`/admin`). `js/main.js` le lit au chargement.
 
-```js
-const INFO = {
-  actif:     true,                 // false = rien ne s'affiche
-  type:      "popup",              // "popup" (modale) | "banniere" (barre haute)
-  id:        "fermeture-aout-2026",// CHANGER l'id => réaffiche à tous, même à ceux qui avaient fermé
-  dateDebut: "2026-07-15",         // "AAAA-MM-JJ" (vide = tout de suite)
-  dateFin:   "2026-08-28",         // "AAAA-MM-JJ" (vide = pas d'expiration)
-  label:     "Information",
-  titre:     "Fermeture annuelle",
-  texte:     "…",                  // HTML simple autorisé (<strong>…)
-  urgences:  true,                 // affiche le bloc "urgences" dans la popup
-  memoriser: false                 // voir avertissement ci-dessous
-};
+```jsonc
+{
+  "actif": true,                  // false = rien ne s'affiche
+  "type": "popup",                // "popup" (modale) | "banniere" (barre haute)
+  "id": "fermeture-aout-2026",    // CHANGER l'id => réaffiche à tous, même à ceux qui avaient fermé
+  "dateDebut": "2026-07-15",      // "AAAA-MM-JJ" (vide = tout de suite)
+  "dateFin": "2026-08-28",        // "AAAA-MM-JJ" (vide = pas d'expiration)
+  "label": "Information",
+  "titre": "Fermeture annuelle",
+  "texte": "…",                   // seuls <strong> et <br> sont interprétés, le reste s'affiche en texte
+  "urgences": true,               // affiche le bloc "urgences" (numéros EN DUR dans index.html, non éditables)
+  "memoriser": true               // true = ne réapparaît plus une fois fermé
+}
 ```
 
-- **Désactiver le message** : `actif: false` (ou laisser passer `dateFin`).
-- **Le message ne s'affiche que si** : `actif` **ET** date du jour dans la plage **ET** pas déjà fermé par le visiteur.
-- **`memoriser`** : `true` = ne réapparaît plus une fois fermé (comportement normal). `false` = s'affiche à **chaque** chargement (mode démo, localStorage ignoré).
-
-> ⚠️ **`memoriser` est actuellement à `false` (mode démo). Le repasser à `true` avant la vraie mise en prod.**
+- **Le message ne s'affiche que si** : `actif` **ET** date du jour dans la plage (bornes incluses) **ET** pas déjà fermé par le visiteur.
+- **`memoriser`** : `true` = comportement normal. `false` = s'affiche à **chaque** chargement (mode démo).
+- ⚠️ **La mémorisation se fait par `id`.** Un nouveau message doit avoir un nouvel `id`, sinon les visiteurs qui ont fermé l'ancien ne verront pas le nouveau. L'admin le régénère lui-même.
+- `info.json` absent ou illisible → aucun message.
 
 ### Carte (accueil)
 

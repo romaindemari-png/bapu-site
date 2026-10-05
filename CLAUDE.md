@@ -25,6 +25,9 @@ mentions-legales.html               Page de texte (gabarit .legal)
 politique-de-confidentialite.html   Page de texte (gabarit .legal)
 css/styles.css                      TOUT le CSS (un seul fichier)
 js/main.js                          TOUT le JS applicatif (hero, parallax, reveal, Lenis, popup INFO, carte, puzzle)
+js/lelab-sante-loader.js            Loader LeLab santé (générique) : _data/textes + coordonnees → marqueurs cms-*
+_data/                              Contenus édités par le client via l'admin (textes, coordonnees, info)
+netlify/functions/save-data.js      Sauvegarde admin → GitHub via Git Gateway — copie À L'OCTET du master lestud-template-food
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)
@@ -81,6 +84,6 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
 
 ## Réglages clés
 
-- **Popup / bandeau d'information** : tout se règle dans l'objet `const INFO` en haut de `js/main.js` (type popup/bannière, dates, textes, `memoriser`). Voir `README.md`.
-- **⚠️ `INFO.memoriser` est actuellement `false` (mode démo : la popup revient à chaque chargement). Repasser à `true` avant la vraie mise en prod.**
+- **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : un nouveau message = un nouvel `id`. Voir `README.md`.
+- **Contenus éditables** (textes Accueil, adresses, téléphones) : `_data/*.json` injectés par `js/lelab-sante-loader.js` via les marqueurs `cms-*` — ne pas retirer ces classes/ids du HTML.
 - **Carte** (accueil) : chargement **au clic** (RGPD) — l'iframe Google n'est injectée qu'au clic sur « Afficher la carte ». Ne pas remettre d'iframe Google en dur.
