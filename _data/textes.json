@@ -1,0 +1,16 @@
+{
+  "accueil": [
+    {
+      "texte": "La prise du premier rendez-vous s’effectue auprès de la secrétaire — par téléphone ou sur place — à Marseille ou à Aix.",
+      "fort": false
+    },
+    {
+      "texte": "Nous garantissons la confidentialité de cette démarche.",
+      "fort": true
+    },
+    {
+      "texte": "Un rendez-vous est ensuite proposé avec un thérapeute dans les meilleurs délais.",
+      "fort": false
+    }
+  ]
+}

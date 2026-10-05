@@ -1,0 +1,20 @@
+{
+  "sites": [
+    {
+      "cle": "marseille",
+      "adresse": [
+        "93 Bd Camille Flammarion,",
+        "13004 Marseille"
+      ],
+      "telephone": "04 91 50 01 13"
+    },
+    {
+      "cle": "aix",
+      "adresse": [
+        "Cité U des Gazelles — Pavillon 7,",
+        "31 Av. Jules Ferry, 13090 Aix-en-Provence"
+      ],
+      "telephone": "07 57 01 47 03"
+    }
+  ]
+}
