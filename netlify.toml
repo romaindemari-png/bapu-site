@@ -1,0 +1,8 @@
+# Site statique sans build : on publie la RACINE du repo.
+# Fonctions LeLab (save-data → Git Gateway) copiées du master lestud-template-food.
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

@@ -1,0 +1,134 @@
+// netlify/functions/save-data.js
+// Sauvegarde les données JSON dans GitHub via Git Gateway (Netlify Identity)
+
+exports.handler = async (event) => {
+
+  if (event.httpMethod !== 'POST') {
+    return { statusCode: 405, body: 'Method Not Allowed' };
+  }
+
+  // Récupérer le token Netlify Identity depuis le header Authorization
+  const authHeader = event.headers['authorization'] || event.headers['Authorization'];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Non autorisé' }) };
+  }
+  const netlifyToken = authHeader.replace('Bearer ', '');
+
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch {
+    return { statusCode: 400, body: JSON.stringify({ error: 'JSON invalide' }) };
+  }
+
+  const { section, data } = body;
+
+  /* ⚠️ LA CORRESPONDANCE section → fichier ÉTAIT ÉCRITE EN DUR — dont « dujour ». Chez Masa il
+     fallait écrire « cematin » : sans cette ligne, la sauvegarde échouait EN SILENCE (« Section
+     inconnue »). Elle est désormais DÉRIVÉE de config.json, qui déclare `admin.edit` (l'id de
+     l'écran) et `admin.fichier` (le JSON visé) pour chaque card.
+
+     ⚠️ ELLE RESTE UNE LISTE BLANCHE. On ne construit JAMAIS un chemin depuis la requête : une
+     section inconnue est REFUSÉE. Dériver n'est pas ouvrir.
+     ⚠️ REPLI EN DUR SUR LE SOCLE : si config.json est injoignable (hoquet réseau, CDN froid), la
+     sauvegarde des sections du socle continue de fonctionner. On ne laisse pas un aléa couper le
+     client de ses données. */
+  const SOCLE = {
+    contact:  '_data/general.json',
+    horaires: '_data/horaires.json',
+    menu:     '_data/carte.json',
+    photos:   '_data/photos.json',
+    config:   '_data/config.json',
+  };
+
+  const fileMap = { ...SOCLE };
+  try {
+    const cfg = await fetch(`${process.env.URL}/_data/config.json`).then(r => r.ok ? r.json() : null);
+    const b = (cfg && cfg.blocs) || {};
+    for (const groupe of [b.socle, b.optionnels]) {
+      for (const [cle, bloc] of Object.entries(groupe || {})) {
+        const cartes = Array.isArray(bloc.admin) ? bloc.admin : [bloc.admin || {}];
+        for (const c of cartes) {
+          const edit = c.edit;                       // pas d'`edit` ⇒ card sans éditeur ⇒ rien à écrire
+          if (!edit) continue;
+          fileMap[edit] = '_data/' + (c.fichier || cle) + '.json';
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[save-data] config.json illisible → repli sur le socle :', e.message);
+  }
+
+  const filePath = fileMap[section];
+  if (!filePath) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Section inconnue' }) };
+  }
+
+  try {
+    // Git Gateway est exposé sur l'origine du site (proxy local), PAS sur api.netlify.com.
+    // process.env.URL est injecté automatiquement par Netlify (URL principale du site).
+    const gatewayBase = `${process.env.URL}/.netlify/git/github`;
+
+    // 1. Récupérer le fichier actuel (pour avoir son SHA)
+    const getRes = await fetch(`${gatewayBase}/contents/${filePath}`, {
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    let sha = null;
+    if (getRes.ok) {
+      const current = await getRes.json();
+      sha = current.sha;
+    } else if (getRes.status !== 404) {
+      // 404 = le fichier n'existe pas encore (création) → on continue sans sha.
+      // Tout autre statut = vraie erreur → on s'arrête avec un message lisible.
+      const detail = await getRes.text();
+      throw new Error(`Lecture du fichier échouée (HTTP ${getRes.status}) : ${detail}`);
+    }
+
+    // 2. Encoder le nouveau contenu en base64
+    /* ⚠️ LE SAUT DE LIGNE FINAL COMPTE. Sans lui, CHAQUE sauvegarde du client
+       produit un faux changement sur la derniere ligne (« \ No newline at end of
+       file ») : son historique git se remplit de diffs qui ne disent rien, et
+       toute comparaison octet a octet avec un fichier ecrit a la main echoue.
+       Constate sur la premiere ecriture reelle de l'admin de Georges. */
+    const newContent = JSON.stringify(data, null, 2) + '\n';
+    const encoded = Buffer.from(newContent).toString('base64');
+
+    // 3. Écrire le fichier dans GitHub via Git Gateway
+    const putBody = {
+      message: `[Admin] Mise à jour ${section}`,
+      content: encoded,
+      ...(sha ? { sha } : {})
+    };
+
+    const putRes = await fetch(`${gatewayBase}/contents/${filePath}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${netlifyToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(putBody)
+    });
+
+    if (!putRes.ok) {
+      // Ne plus supposer du JSON : lire le corps en texte pour remonter la vraie erreur HTTP.
+      const detail = await putRes.text();
+      throw new Error(`Écriture GitHub échouée (HTTP ${putRes.status}) : ${detail}`);
+    }
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true, file: filePath })
+    };
+
+  } catch (err) {
+    console.error('Erreur save-data:', err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
+  }
+};
