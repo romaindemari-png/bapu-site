@@ -65,9 +65,33 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   await ouvrirEdition('accueil');
   let env = await publierEtAttendre();
   ok('textes : clés inconnues (racine et paragraphe) conservées, ordre compris',
-    env && JSON.stringify(Object.keys(env.data)) === '["avant","accueil","apres"]' && JSON.stringify(Object.keys(env.data.accueil[1])) === '["id","texte","fort","note"]', JSON.stringify(env && env.data));
+    env && JSON.stringify(Object.keys(env.data)) === '["avant","accueil","apres"]' && JSON.stringify(Object.keys(env.data.accueil[1])) === '["id","texte","fort","role","note"]', JSON.stringify(env && env.data));
   await ouvrirEdition('coordonnees'); env = await publierEtAttendre();
   ok('coordonnees : clé inconnue d’un site conservée', env && env.data.sites[0].horaires === 'garde-moi');
+
+  /* 2 bis. Le libellé suit le RÔLE du texte (textes.json → role), pas sa position. */
+  const libelles = () => p.evaluate(() => [...document.querySelectorAll('#editCorps .ed-num')].map(n => n.textContent));
+  await ouvrir(); await ouvrirEdition('accueil');
+  await p.evaluate(() => document.querySelectorAll('#editCorps .ed-suppr')[1].click());
+  env = await publierEtAttendre();
+  ok('textes : suppression du 2e → les rôles restants voyagent avec leur texte',
+    env && JSON.stringify(env.data.accueil.map(x => x.role)) === '["prise-de-rendez-vous","delai"]', JSON.stringify(env && env.data));
+  await ouvrir();
+  await p.evaluate(d => { donnees.textes = d; }, env ? env.data : null);
+  await ouvrirEdition('accueil');
+  ok('textes : réouverture après suppression → chaque libellé reste sur son texte',
+    JSON.stringify(await libelles()) === '["Comment prendre rendez-vous","Délai de rendez-vous"]', JSON.stringify(await libelles()));
+
+  /* 2 ter. Fichier non migré (paragraphes sans role) : toléré, numéroté, réécrit tel quel. */
+  await ouvrir();
+  const sansRole = { accueil: JSON.parse(fichier('textes')).accueil.map(({ role, ...x }) => x) };
+  await p.evaluate(d => { donnees.textes = d; }, sansRole);
+  await ouvrirEdition('accueil');
+  ok('textes sans role : numérotation en secours',
+    JSON.stringify(await libelles()) === '["1er paragraphe","2e paragraphe","3e paragraphe"]', JSON.stringify(await libelles()));
+  env = await publierEtAttendre();
+  ok('textes sans role : aller-retour neutre identique à l’octet (aucun role ajouté)',
+    env && commeSaveData(env.data) === commeSaveData(sansRole), env ? commeSaveData(env.data) : 'aucun envoi');
 
   /* 3. Modifications réelles. */
   await ouvrir(); await ouvrirEdition('accueil');

@@ -51,7 +51,7 @@ function toutesLesCartes(){
         cartes.push({ cle, type: bloc.type || cle, label: a.label || bloc.label, action: a.action || bloc.action || bloc.label,
                       edit: a.edit, fichier: a.fichier || cle, picto: a.picto, sub: a.sub || '',
                       emplacement: a.emplacement || null, aides: a.aides || {},
-                      libelles: Array.isArray(a.libelles) ? a.libelles : [] });
+                      libelles: (a.libelles && typeof a.libelles === 'object' && !Array.isArray(a.libelles)) ? a.libelles : {} });
       });
     }
   }
@@ -202,9 +202,11 @@ const EDITEURS = {
     const liste = Array.isArray(donnee && donnee[cle]) ? donnee[cle] : [];
     const zone = el('div', { class: 'ed-liste' });
     const lignes = [];
-    /* Libellé de rôle (config.json → admin.libelles), attribué au chargement selon la position
-       et attaché au paragraphe : il le suit si un autre est supprimé. Sans libellé, numérotation. */
-    function ajouter(origine, libelle){
+    /* Libellé de rôle : le paragraphe porte son rôle (textes.json → role), config.json le traduit
+       (admin.libelles[role]). Le libellé suit donc le texte, pas la position. Paragraphe sans
+       rôle (nouveau, ou fichier non migré) : numérotation. */
+    function ajouter(origine){
+      const libelle = origine && origine.role ? carte.libelles[origine.role] : undefined;
       const ta = champ('textarea', { rows: '3' }, origine ? origine.texte : '');
       const gras = interrupteur('En gras', origine ? origine.fort : false);
       const suppr = el('button', { type: 'button', class: 'ed-suppr', 'aria-label': 'Supprimer ce paragraphe', text: 'Supprimer' });
@@ -221,7 +223,7 @@ const EDITEURS = {
       return ligne;
     }
     function numeroter(){ lignes.forEach((l, i) => { l.bloc.querySelector('.ed-num').textContent = l.libelle || ((i === 0 ? '1er' : (i + 1) + 'e') + ' paragraphe'); }); }
-    (liste.length ? liste : [null]).forEach((origine, i) => ajouter(origine, origine ? carte.libelles[i] : undefined));
+    (liste.length ? liste : [null]).forEach(o => ajouter(o));
     const plus = el('button', { type: 'button', class: 'ed-ajout', text: '+ Ajouter un paragraphe' });
     plus.addEventListener('click', () => { ajouter(null).ta.focus(); signalerSaisie(); });
     return {

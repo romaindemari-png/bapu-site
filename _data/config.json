@@ -20,11 +20,11 @@
           "fichier": "textes",
           "picto": "texte",
           "sub": "Bloc « Accueil » · prise de rendez-vous",
-          "libelles": [
-            "Comment prendre rendez-vous",
-            "Confidentialité",
-            "Délai de rendez-vous"
-          ],
+          "libelles": {
+            "prise-de-rendez-vous": "Comment prendre rendez-vous",
+            "confidentialite": "Confidentialité",
+            "delai": "Délai de rendez-vous"
+          },
           "emplacement": {
             "titre": "Section « Infos pratiques » — bloc « Accueil. »",
             "texte": "En bas de la page d’accueil, sous le titre « Accueil. », juste avant les adresses. Ce sont les phrases qui expliquent comment prendre un premier rendez-vous.",
