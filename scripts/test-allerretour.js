@@ -42,12 +42,29 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     p.on('pageerror', e => ok('aucune erreur JS', false, e.message));
     await p.goto(BASE + '/admin/', { waitUntil: 'networkidle0' });   // localhost → bypass dev → boot()
     await p.evaluate(() => { session = { access_token: 'test', refresh_token: 'test', expires_at: Date.now() + 3600e3 }; });
+    /* L'éditeur « textes » reste une brique générique santé, mais BAPU ne l'expose plus
+       (config.json : bloc accueil sans admin.edit). Pour continuer à le tester, on le
+       réactive EN MÉMOIRE de la page de test — jamais dans les fichiers. */
+    await p.evaluate(async () => {
+      const a = donnees.config.blocs.socle.accueil && donnees.config.blocs.socle.accueil.admin;
+      if (a && !a.edit){ a.edit = 'accueil'; donnees.textes = await _json('textes'); }
+    });
   }
   const ouvrirEdition = edit => p.evaluate(e => openEdit(toutesLesCartes().find(c => c.edit === e)), edit);
   const publierEtAttendre = async () => { const n = envois.length; await p.evaluate(() => publier()); await new Promise(r => setTimeout(r, 150)); return envois.length > n ? envois[envois.length - 1] : null; };
   const boutonActif = () => p.evaluate(() => !document.getElementById('btnPublier').disabled);
   const saisir = (sel, val) => p.evaluate((s, v) => { const n = document.querySelectorAll('#editCorps ' + s)[0]; n.value = v; n.dispatchEvent(new Event('input', { bubbles: true })); }, sel, val);
   const saisirN = (sel, i, val) => p.evaluate((s, k, v) => { const n = document.querySelectorAll('#editCorps ' + s)[k]; n.value = v; n.dispatchEvent(new Event('input', { bubbles: true })); }, sel, i, val);
+
+  /* 0. Configuration BAPU telle que publiée : textes d'accueil NON éditables. */
+  {
+    const q = await b.newPage();
+    await q.goto(BASE + '/admin/', { waitUntil: 'networkidle0' });
+    const r = await q.evaluate(() => ({ cartes: toutesLesCartes().map(c => c.edit), dom: [...document.querySelectorAll('#siteCards .card')].map(c => c.dataset.edit), textesLu: 'textes' in etatDonnees }));
+    ok('config BAPU : aucune carte « accueil » (ni dans la config lue, ni à l’écran)', !r.cartes.includes('accueil') && !r.dom.includes('accueil') && r.dom.length === 2, JSON.stringify(r));
+    ok('config BAPU : textes.json n’est même plus chargé par l’admin', !r.textesLu, JSON.stringify(r));
+    await q.close();
+  }
 
   /* 1. ALLER-RETOUR NEUTRE — ouvrir, publier sans rien changer : octet pour octet. */
   for (const [edit, f] of [['accueil', 'textes'], ['coordonnees', 'coordonnees'], ['message', 'info']]){

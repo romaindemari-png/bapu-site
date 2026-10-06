@@ -16,7 +16,6 @@
           "infos"
         ],
         "admin": {
-          "edit": "accueil",
           "fichier": "textes",
           "picto": "texte",
           "sub": "Bloc « Accueil » · prise de rendez-vous",
