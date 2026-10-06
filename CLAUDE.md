@@ -85,6 +85,7 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
 ## Réglages clés
 
 - **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : un nouveau message = un nouvel `id`. Voir `README.md`.
-- **Contenus éditables** (textes Accueil, adresses, téléphones) : `_data/*.json` injectés par `js/lelab-sante-loader.js` via les marqueurs `cms-*` — ne pas retirer ces classes/ids du HTML.
-- **Libellés de l'admin (textes)** : chaque paragraphe de `_data/textes.json` porte un `role` ; le libellé vient de `config.json → admin.libelles[role]`. Paragraphe sans role → numérotation. Ne jamais revenir à un libellé par position (une suppression décalerait tous les libellés).
+- **Contenus injectés** (textes Accueil, adresses, téléphones) : `_data/*.json` injectés par `js/lelab-sante-loader.js` via les marqueurs `cms-*` — ne pas retirer ces classes/ids du HTML.
+- **Éditables par le client** : adresses, téléphones, message d'info. **Textes d'accueil FIGÉS** (validés) : toujours servis par `_data/textes.json`, mais le bloc `accueil` de `config.json` n'a plus d'`admin.edit` → pas de carte dans l'admin, et `save-data` refuse la section. Pour réactiver : remettre `"edit": "accueil"` (libellés et encart sont restés dans la config).
+- **Libellés de l'admin (textes)**, si l'éditeur est réactivé : chaque paragraphe de `_data/textes.json` porte un `role` ; le libellé vient de `config.json → admin.libelles[role]`. Paragraphe sans role → numérotation. Ne jamais revenir à un libellé par position (une suppression décalerait tous les libellés).
 - **Carte** (accueil) : chargement **au clic** (RGPD) — l'iframe Google n'est injectée qu'au clic sur « Afficher la carte ». Ne pas remettre d'iframe Google en dur.
