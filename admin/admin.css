@@ -91,7 +91,9 @@ body:not(.authed) .app{display:none}
 /* ── Mon site ── */
 .screen-h{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:var(--sp-2)}
 .screen-p{color:var(--ink-2);margin-bottom:var(--sp-8)}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-3)}
+/* auto-fit : autant de colonnes que la largeur en permet (3 max dans la colonne de 576 px),
+   et les colonnes VIDES s'effacent — 2 cartes occupent toute la largeur, sans trou à droite. */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--sp-3)}
 .card{position:relative;min-height:160px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);text-align:left;display:flex;flex-direction:column;transition:border-color .2s}
 .card:hover{border-color:var(--ink-3)}
 .card-ico{width:46px;height:46px;border-radius:var(--r-sm);background:var(--m-color);color:var(--m-on-color);display:flex;align-items:center;justify-content:center;margin-bottom:var(--sp-5)}
@@ -181,7 +183,6 @@ body.dev-local .dev-badge{display:block;position:fixed;left:var(--sp-4);bottom:v
   .topbar-m .logout{color:var(--ink)}
   .main{margin-left:0;padding:var(--sp-5) var(--sp-4) calc(96px + env(safe-area-inset-bottom))}
   .hello{font-size:34px}
-  .cards{grid-template-columns:1fr 1fr}
   .nav-bas{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:var(--sp-2) 0 calc(var(--sp-2) + env(safe-area-inset-bottom));z-index:40}
   .nb-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:600;color:var(--ink-2);min-height:44px;justify-content:center}
   .nb-item svg{width:22px;height:22px}
@@ -193,7 +194,7 @@ body.dev-local .dev-badge{display:block;position:fixed;left:var(--sp-4);bottom:v
   .fld-duo{grid-template-columns:1fr}
 }
 @media (max-width:380px){
-  .tiles,.cards{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important}
