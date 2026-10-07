@@ -123,6 +123,22 @@ h2.qh{color:var(--p);font-size:clamp(30px,4.2vw,44px);margin-bottom:clamp(16px,2
 .mani .rot.entering{opacity:0;transform:translateY(12px);transition:none}
 .mani .sig{margin-top:clamp(34px,5vw,52px);display:flex;align-items:center;gap:14px;font-weight:400;font-size:14px;color:#6a6a6a}
 .mani .sig .dot{width:9px;height:9px;border-radius:50%;background:var(--v);flex:none}
+/* VIVANT — carrousel « Le BAPU au quotidien » (scroll-snap natif, aucun autoplay) */
+.vivant{background:#fff;padding-block:clamp(58px,8vw,104px)}
+.vcar{position:relative}
+.vtrack{list-style:none;display:flex;gap:clamp(12px,1.6vw,20px);overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.vtrack::-webkit-scrollbar{display:none}
+.vslide{flex:0 0 68%;scroll-snap-align:center;border-radius:20px;overflow:hidden;background:var(--bg)}
+.vslide img{display:block;width:100%;height:auto;aspect-ratio:3/2;object-fit:cover}
+.vnav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.88);color:var(--ink);box-shadow:0 10px 24px -12px rgba(59,59,59,.45);display:grid;place-items:center;cursor:pointer;transition:opacity .25s,background .25s}
+.vnav::before{content:"";width:9px;height:9px;border-top:1.8px solid currentColor;border-right:1.8px solid currentColor}
+.vprev{left:12px}.vprev::before{transform:translateX(2px) rotate(-135deg)}
+.vnext{right:12px}.vnext::before{transform:translateX(-2px) rotate(45deg)}
+.vnav:hover{background:#fff}
+.vnav:disabled{opacity:0;pointer-events:none}
+@media(max-width:720px){.vslide{flex-basis:86%}}
+@media(hover:none) and (pointer:coarse){.vnav{opacity:0;pointer-events:none}.vnav:focus-visible{opacity:1}}
+@media(prefers-reduced-motion:reduce){.vtrack{scroll-behavior:auto}.vnav{transition:none}}
 .rdv{position:relative;background:var(--pink);color:#fff;overflow:hidden}
 .rdv .in{display:grid;grid-template-columns:1.06fr .94fr;gap:clamp(24px,4vw,56px);align-items:stretch;padding-top:clamp(56px,8vw,100px);padding-bottom:0}
 .rdv-text{padding-bottom:clamp(52px,7vw,92px);position:relative;z-index:2}
