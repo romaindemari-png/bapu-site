@@ -52,6 +52,7 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
    - Encre (texte) `--ink` **#3B3B3B**
    - Fond papier `--paper` **#fff**, fond alt `--bg` **#F5F5F3**
    - Gris `--muted` **#9A9A9A**, filet `--hair` **#E4E3DF**
+   - `--cream` **#F3EEE7** : placeholder des médias (couleur utilitaire, pas une couleur de marque)
    Les mêmes cinq couleurs vives sont dupliquées dans `js/main.js` (`const PAL`) pour les formes SVG — garder synchronisé.
 
 ## MÉTHODE DE TRAVAIL (non négociable)
