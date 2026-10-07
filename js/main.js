@@ -23,10 +23,10 @@ const PRESET=("V.qTR V.qTL B.qBL O.qBR P.qTR P.sq O.qBR O.qBL B.sq O.sq R.qBR R.
 const NS="http://www.w3.org/2000/svg",reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function inner(t){return t.s==="bl"?"":`<path d="${PATH[t.s]}" fill="${PAL[t.c]}"/>`}
 /* FRISES (hero mobile + bande du bas) : TUILES ENTIÈRES, même méthode pour les deux.
-   Colonnes depuis une taille cible (100 px mobile, 90 px desktop), puis hauteur = largeur ÷ colonnes :
+   Colonnes depuis une taille cible (65 px mobile ≤820, 90 px desktop), puis hauteur = largeur ÷ colonnes :
    aucune tuile coupée, même échelle en haut et en bas. Le PANNEAU hero desktop garde sa grille
    (colonnes ET lignes) — inchangé. row0 = ligne du PRESET où commence le dessin (bande du bas : ligne 3). */
-function fill(svg,box,U,live,row0){const mob=innerWidth<=820,frise=!live||mob;if(live&&!mob){box.style.minHeight=box.style.height=""}const r=box.getBoundingClientRect();let cols,rows;if(frise){cols=Math.max(3,Math.round(r.width/(mob?100:90)));rows=1;const t=r.width/cols+"px";if(live){box.style.minHeight=box.style.height=t}else{svg.style.height=t}}else{cols=Math.max(3,Math.round(r.width/U));rows=Math.max(1,Math.round(r.height/U))}
+function fill(svg,box,U,live,row0){const mob=innerWidth<=820,frise=!live||mob;if(live&&!mob){box.style.minHeight=box.style.height=""}const r=box.getBoundingClientRect();let cols,rows;if(frise){cols=Math.max(3,Math.round(r.width/(mob?65:90)));rows=1;const t=r.width/cols+"px";if(live){box.style.minHeight=box.style.height=t}else{svg.style.height=t}}else{cols=Math.max(3,Math.round(r.width/U));rows=Math.max(1,Math.round(r.height/U))}
  svg.setAttribute("viewBox",`0 0 ${cols*100} ${rows*100}`);svg.innerHTML="";
  for(let ri=0;ri<rows;ri++)for(let ci=0;ci<cols;ci++){const t=PRESET[(((row0||0)+ri)%6)*6+(ci%6)];const g=document.createElementNS(NS,"g");g.setAttribute("class","cell");
   g.setAttribute("transform",`translate(${ci*100} ${ri*100})`);g.innerHTML=inner(t);svg.appendChild(g);
