@@ -243,6 +243,35 @@ html.has-banner body{padding-top:var(--banH)}
 .furg-line a{color:#fff;font-family:"NM";font-weight:500;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.55);white-space:nowrap}
 .furg-line a:hover{border-bottom-color:#fff}
 @media(prefers-reduced-motion:reduce){.info-pop,.info-card,.info-ban{transition:none}}
+/* ===== NAV MOBILE — burger + panneau encre (≤720px) ===== */
+.nav-burger{display:none}
+.mnav{position:fixed;inset:0;z-index:80}
+.mnav[hidden]{display:none}
+.mnav-fond{position:absolute;inset:0;background:rgba(59,59,59,.4);opacity:0;transition:opacity .35s ease}
+.mnav-panel{position:absolute;top:0;right:0;bottom:0;width:calc(100% - 44px);max-width:440px;overflow:hidden auto;overscroll-behavior:contain;display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top)) clamp(22px,6vw,32px) calc(26px + env(safe-area-inset-bottom));background:var(--ink);color:#fff;transform:translateX(100%);transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.mnav.open .mnav-fond{opacity:1}.mnav.open .mnav-panel{transform:none}
+.mnav-quart{position:absolute;top:-70px;right:-70px;width:220px;height:220px;border-radius:0 0 0 220px;background:var(--p);opacity:.9;pointer-events:none}
+.mnav-top{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:56px}
+.mnav-over{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62)}
+.mnav-over::before{content:"";width:26px;height:1px;background:currentColor;opacity:.5}
+.mnav-x{width:44px;height:44px;margin-right:-6px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;display:grid;place-items:center;cursor:pointer}
+.mnav-x svg{width:18px;height:18px}
+.mnav-liens{position:relative;list-style:none;margin:clamp(24px,7vh,56px) 0 0}
+.mnav-liens a{display:flex;align-items:baseline;gap:16px;min-height:44px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.16);font-family:"NM";font-weight:500;font-size:clamp(28px,8.2vw,36px);line-height:1.05;letter-spacing:-.015em;color:#fff;text-decoration:none}
+.mnav-liens li:first-child a{border-top:1px solid rgba(255,255,255,.16)}
+.mnav-liens .n{flex:none;width:22px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.08em;transform:translateY(-.9em)}
+.mnav-liens li:nth-child(1) .n{color:var(--p)}.mnav-liens li:nth-child(2) .n{color:var(--o)}.mnav-liens li:nth-child(3) .n{color:var(--b)}
+.mnav-appel{position:relative;margin-top:auto;padding-top:36px;display:flex;flex-direction:column;gap:11px}
+.mnav-label{font-size:12px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.62);margin-bottom:3px}
+.mnav-appel .callA{width:100%;min-height:58px}
+.mnav-urg{position:relative;align-self:flex-start;margin-top:18px;padding:14px 0;font-size:13.5px;line-height:1.2;color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4)}
+@media(max-width:720px){
+ .nav-links{display:none}
+ nav{padding-block:8px}
+ .nav-burger{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:44px;height:44px;margin-right:-10px;border:0;background:none;color:var(--ink);cursor:pointer}
+ .nav-burger span{display:block;width:22px;height:2px;border-radius:2px;background:currentColor}
+}
+@media(prefers-reduced-motion:reduce){.mnav-fond,.mnav-panel{transition:none}}
 /* ============ Pages de texte (mentions légales, confidentialité) — scopé .legal ============ */
 .nav-home{display:inline-flex;align-items:center}
 .legal{max-width:800px;margin:0 auto;padding:clamp(44px,8vw,88px) clamp(22px,5vw,52px) clamp(64px,10vw,120px)}
