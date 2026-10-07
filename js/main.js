@@ -22,15 +22,19 @@ const PATH={ci:"M50,0A50,50 0 1 1 50,100A50,50 0 1 1 50,0Z",sT:"M0,0H100A50,50 0
 const PRESET=("V.qTR V.qTL B.qBL O.qBR P.qTR P.sq O.qBR O.qBL B.sq O.sq R.qBR R.sq B.qBL R.qBR O.qBR B.qBL . V.sq B.qTL R.qTR O.sq B.sq O.qBR O.sq B.qTR B.sq V.qBL V.qBR B.sq B.qBL P.qBR P.sq V.sq V.sq B.qTR B.sq").trim().split(/\s+/).map(t=>t==="."?{s:"bl"}:{c:t.split(".")[0],s:t.split(".")[1]});
 const NS="http://www.w3.org/2000/svg",reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
 function inner(t){return t.s==="bl"?"":`<path d="${PATH[t.s]}" fill="${PAL[t.c]}"/>`}
-function fill(svg,box,U,live){const r=box.getBoundingClientRect();const mob=live&&innerWidth<=820,cols=mob?Math.max(3,Math.round(r.width/r.height)):Math.max(3,Math.round(r.width/U)),rows=mob?1:Math.max(1,Math.round(r.height/U));
+/* FRISES (hero mobile + bande du bas) : TUILES ENTIÈRES, même méthode pour les deux.
+   Colonnes depuis une taille cible (100 px mobile, 90 px desktop), puis hauteur = largeur ÷ colonnes :
+   aucune tuile coupée, même échelle en haut et en bas. Le PANNEAU hero desktop garde sa grille
+   (colonnes ET lignes) — inchangé. row0 = ligne du PRESET où commence le dessin (bande du bas : ligne 3). */
+function fill(svg,box,U,live,row0){const mob=innerWidth<=820,frise=!live||mob;if(live&&!mob){box.style.minHeight=box.style.height=""}const r=box.getBoundingClientRect();let cols,rows;if(frise){cols=Math.max(3,Math.round(r.width/(mob?100:90)));rows=1;const t=r.width/cols+"px";if(live){box.style.minHeight=box.style.height=t}else{svg.style.height=t}}else{cols=Math.max(3,Math.round(r.width/U));rows=Math.max(1,Math.round(r.height/U))}
  svg.setAttribute("viewBox",`0 0 ${cols*100} ${rows*100}`);svg.innerHTML="";
- for(let ri=0;ri<rows;ri++)for(let ci=0;ci<cols;ci++){const t=PRESET[(ri%6)*6+(ci%6)];const g=document.createElementNS(NS,"g");g.setAttribute("class","cell");
+ for(let ri=0;ri<rows;ri++)for(let ci=0;ci<cols;ci++){const t=PRESET[(((row0||0)+ri)%6)*6+(ci%6)];const g=document.createElementNS(NS,"g");g.setAttribute("class","cell");
   g.setAttribute("transform",`translate(${ci*100} ${ri*100})`);g.innerHTML=inner(t);svg.appendChild(g);
   if(reduce)g.style.opacity=1;else setTimeout(()=>g.style.opacity=1,(ci+ri)*38+30);
   if(live&&!reduce&&t.s!=="bl"&&Math.random()<0.16){g.setAttribute("class","cell breathe");const p=g.firstChild;if(p&&p.style)p.style.animationDelay=(Math.random()*6).toFixed(2)+"s";}}}
 const heroSvg=document.getElementById("hero-grid"),heroBox=document.getElementById("hero-panel");
 const bandSvg=document.getElementById("band1"),bandBox=bandSvg?bandSvg.parentElement:null;
-function draw(){const U=innerWidth<=820?60:90;if(heroSvg&&heroBox)fill(heroSvg,heroBox,U,true);if(bandSvg&&bandBox)fill(bandSvg,bandBox,U,false)}
+function draw(){const U=innerWidth<=820?60:90;if(heroSvg&&heroBox)fill(heroSvg,heroBox,U,true);if(bandSvg&&bandBox)fill(bandSvg,bandBox,U,false,2)}
 draw();let rt,lastW=innerWidth;addEventListener("resize",()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rt);rt=setTimeout(draw,220)},{passive:true});
 const nav=document.getElementById("nav"),os=()=>{if(nav)nav.classList.toggle("scrolled",scrollY>8)};addEventListener("scroll",os,{passive:true});os();
 (function(){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("shown");io.unobserve(e.target)}}),{threshold:.12,rootMargin:"0px 0px -8% 0px"});const G=[[".qsn .amedia",0],[".qsn .acontent",0],[".pictos .overline",0],[".picto",90],[".mani .overline",0],[".mani .phrase",70],[".mani .sig",140],[".rdv-text",0],[".rdv-visual",0],[".icols>div",100],[".partners",0],[".fbot",0]];G.forEach(([sel,step])=>document.querySelectorAll(sel).forEach((el,i)=>{el.classList.add("reveal");if(step)el.style.transitionDelay=(i*step)+"ms";io.observe(el)}));})();
