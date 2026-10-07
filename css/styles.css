@@ -159,8 +159,6 @@ h2.qh{color:var(--p);font-size:clamp(30px,4.2vw,44px);margin-bottom:clamp(16px,2
 .mapsec h2{font-family:"NM";font-weight:500;font-size:clamp(26px,3.6vw,40px);line-height:1.05;letter-spacing:-.01em;margin-bottom:clamp(28px,4vw,44px)}
 .mapwrap{position:relative;border-radius:20px;overflow:hidden;box-shadow:0 34px 66px -38px rgba(59,59,59,.34)}
 .mapwrap .map{width:100%;height:clamp(320px,44vw,500px);display:block;border:0}
-.mapsec .mapaddr{margin-top:16px;display:flex;align-items:center;gap:9px;font-size:13px;letter-spacing:.02em;color:#6a6a6a}
-.mapsec .mapaddr::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--b);flex:none}
 .pin{position:absolute;z-index:2}
 .pin .dot{width:18px;height:18px;border-radius:50%;border:3px solid #fff;box-shadow:0 5px 12px rgba(0,0,0,.28);position:relative}
 .pin.mars{color:var(--b)}.pin.aix{color:var(--o)}
@@ -242,6 +240,20 @@ html.has-banner body{padding-top:var(--banH)}
 .furg-line strong{font-weight:600}
 .furg-line a{color:#fff;font-family:"NM";font-weight:500;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.55);white-space:nowrap}
 .furg-line a:hover{border-bottom-color:#fff}
+/* MOBILE — footer : césures et zones de tap (desktop inchangé)
+   Césures : chaque ligne d'adresse et chaque groupe « numéro + séparateur » ne se coupe pas.
+   Zones de tap : pseudo-élément transparent, étendu jusqu'à la mi-distance du voisin cliquable
+   (jamais de chevauchement) — 44 px là où l'espace le permet, sans toucher au rendu. */
+@media(max-width:820px){
+ .faddr{max-width:none}.faddr .adr-l{display:inline-block}
+ .furg-i{white-space:nowrap}
+ .fmap a::before,.fpartners a::before,.flinks a::before,.ftel::before,.furg-line a::before{content:"";position:absolute;left:-4px;right:-4px}
+ .ftel{position:relative}.ftel::before{top:-10.5px;bottom:-10.5px}
+ .fmap a::before{top:-4.5px;bottom:-4.5px}
+ .fpartners a::before{top:-5px;bottom:-5px}
+ .flinks a::before{top:-11px;bottom:-16px;left:-12px;right:-12px}
+ .furg-line a{position:relative}.furg-line a::before{top:-2.5px;bottom:-3px}
+}
 @media(prefers-reduced-motion:reduce){.info-pop,.info-card,.info-ban{transition:none}}
 /* ===== NAV MOBILE — burger + panneau encre (≤720px) ===== */
 .nav-burger{display:none}

@@ -12,7 +12,9 @@
      .cms-tel-<site>         texte = coordonnees.sites[cle=<site>].telephone
      .cms-tellink-<site>     href  = tel: dérivé du téléphone
      .cms-adr-<site>         adresse, lignes séparées par <br>
-     .cms-adrl-<site>        adresse sur une ligne (lignes jointes par une espace)
+     .cms-adrl-<site>        adresse sur une ligne : une <span class="adr-l"> par ligne,
+                             séparées par une espace (le CSS peut empêcher la coupure
+                             à l'intérieur d'une ligne, ex. « Aix-en-Provence »)
 
    ⚠️ Rien que du TEXTE et des href : jamais innerHTML (le contenu vient de
       l'admin), jamais de classe de layout ni de reveal touchée.
@@ -88,7 +90,16 @@
             el.appendChild(document.createTextNode(l));
           });
         });
-        each('.cms-adrl-' + cle, function (el) { el.textContent = lignes.join(' '); });
+        each('.cms-adrl-' + cle, function (el) {
+          el.textContent = '';
+          lignes.forEach(function (l, i) {
+            if (i) el.appendChild(document.createTextNode(' '));
+            var s = document.createElement('span');
+            s.className = 'adr-l';
+            s.textContent = l;
+            el.appendChild(s);
+          });
+        });
       }
     });
   }
