@@ -82,6 +82,9 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
 6. **Collision de classe `in`.**
    La classe de reveal `"in"` écrasait la classe de layout `.rdv .in`. → Renommée **`"shown"`**. **NE JAMAIS revenir à `"in"`.**
 
+7. **`picture{display:contents}` global (`css/styles.css` l. 1) : à NE PAS retirer.**
+   Il est PRÉSENT et FONCTIONNE ici (fauteuil de « Qui sommes-nous » + téléphone de la section RDV), validé sur iPhone. Ne PAS le retirer : ces 2 `<picture>` portent le parallax et des positions mobile figées, délicates à caler. Le piège `display:contents` (piège 1, invariant 5) vaut pour le **centrage**, pas ici. Décision du 07/10/2026 (audit mobile, point B4 écarté).
+
 ## Réglages clés
 
 - **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : un nouveau message = un nouvel `id`. Voir `README.md`.
