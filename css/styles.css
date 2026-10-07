@@ -111,7 +111,7 @@ h2.qh{color:var(--p);font-size:clamp(30px,4.2vw,44px);margin-bottom:clamp(16px,2
 .picto p{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.85);max-width:26ch}
 .pictos .bgshape{position:absolute;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none}
 @media(max-width:900px){.pgrid{grid-template-columns:1fr 1fr;gap:44px 24px}}
-@media(max-width:520px){.pgrid{grid-template-columns:1fr;gap:40px}}
+@media(max-width:520px){.pgrid{grid-template-columns:1fr 1fr;gap:36px 16px}.picto .ico{width:64px;height:64px;margin-bottom:16px}.picto .ico img{width:34px !important;height:34px !important}.picto h3{font-size:16px;margin-bottom:8px}.picto p{font-size:13px}}
 /* RDV pink - le fil du tel s'arrete pile en bas de section */
 /* MANIFESTE */
 .mani{background:#fff;padding-block:clamp(80px,13vw,180px)}
