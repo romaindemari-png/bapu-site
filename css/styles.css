@@ -209,21 +209,19 @@ footer{background:var(--b);color:#fff;padding:clamp(48px,7vw,80px) 0 28px}
 .fpartners{list-style:none;display:flex;flex-direction:column;gap:10px}
 .fpartners li{font-size:15px;font-weight:500;color:#fff}
 .flabel-ghost{visibility:hidden}
-@media(max-width:820px){.flabel-ghost{display:none}}
-.fpartners-band{margin-top:clamp(34px,5vw,56px)}
-.fpartners-band .flabel{margin-bottom:20px}
-.fplogos{display:flex;flex-wrap:wrap;align-items:center;gap:clamp(26px,3.6vw,52px)}
-.fplogos .fp{display:inline-flex;align-items:center;opacity:.9;transition:opacity .25s,transform .25s}
+.fpartners-band .flabel{margin-bottom:24px}
+.fplogos{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:28px 32px}
+.fplogos .fp{display:flex;align-items:center;justify-content:center;opacity:.95;transition:opacity .25s,transform .25s}
 .fplogos .fp:hover{opacity:1;transform:translateY(-2px)}
-.fplogos .fp img{display:block;width:auto}
-.fp-crous img{height:42px}
-.fp-etudiant img{height:38px}
-.fp-imaje img{height:29px}
-.fp-mda img{height:48px}
-.fp-intervenir img{height:42px}
-.fp-addmed img{height:38px}
-.fp-lgbt img{height:46px}
-@media(max-width:560px){.fplogos{gap:24px}.fp-mda img{height:42px}.fp-lgbt img{height:40px}.fp-crous img{height:38px}.fp-intervenir img{height:38px}}
+.fplogos .fp img{display:block;width:auto;max-width:100%}
+.fp-crous img{height:52px}.fp-etudiant img{height:36px}.fp-imaje img{height:36px}.fp-mda img{height:52px}
+.fp-intervenir img{height:40px}.fp-addmed img{height:36px}.fp-lgbt img{height:50px}
+.frule.frule-top{margin:clamp(30px,4.5vw,48px) 0 clamp(34px,5vw,54px)}
+@media(max-width:820px){.flabel-ghost{display:none}.fcol-sub{margin-top:-38px}
+ .fplogos{display:grid;grid-template-columns:1fr 1fr;gap:30px 18px;justify-items:center}
+ .fplogos .fp:last-child{grid-column:1/-1}
+ .fp-crous img{height:50px}.fp-etudiant img{height:32px}.fp-imaje img{height:32px}.fp-mda img{height:50px}
+ .fp-intervenir img{height:36px}.fp-addmed img{height:33px}.fp-lgbt img{height:46px}}
 .frule{height:1px;background:rgba(255,255,255,.4);margin:clamp(32px,5vw,54px) 0 22px}
 .fbottom{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .flinks{display:flex;gap:24px;flex-wrap:wrap}
