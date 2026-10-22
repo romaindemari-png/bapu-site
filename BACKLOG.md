@@ -12,7 +12,7 @@ Ce qui reste à faire. Cocher au fur et à mesure. Un point = un chantier = un c
 
 ## Améliorations
 
-- [ ] **Logos partenaires** dans le footer — actuellement en **texte** (liste `.fpartners`). À remplacer par les logos officiels (avec accord/usage vérifié).
+- [x] Logos partenaires dans le footer — fait le 22/10/2026 (5d44be1 + fa64f22), à la demande de la cliente (logos déjà présents sur l'ancien site), logos officiels fournis par Romain.
 - [ ] **Adresse de Marseille éditable → la carte doit suivre.** Hors v1 de l'admin : l'adresse figure encore en dur dans la section carte (`.map-ph-addr`, et l'adresse codée dans `data-embed` + le lien « Ouvrir dans Google Maps » ; le doublon `.mapaddr` sous la carte a été retiré le 07/10). Le jour où elle devient éditable, ces emplacements doivent lire la **même source** que `_data/coordonnees.json` — sinon le client change son adresse et la carte affiche l'ancienne.
 - [ ] **Page / déclaration d'accessibilité** — le lien « Accessibilité » du footer est encore en `href="#"` sur toutes les pages. Créer la page et brancher les liens.
 
