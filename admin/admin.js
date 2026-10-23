@@ -239,7 +239,9 @@ const EDITEURS = {
     };
   },
 
-  /* ── Adresses et téléphones : donnee.sites = [{cle, nom, adresse[], telephone}] ── */
+  /* ── Adresses et téléphones : donnee.sites = [{cle, nom, adresse[], telephone?}]
+     + donnee.telephones = {standard, portable} (optionnel, numéros communs à tous les sites).
+     Le champ téléphone d'un site n'apparaît que si ce site a un `telephone`. ── */
   coordonnees(carte, donnee){
     const sites = Array.isArray(donnee && donnee.sites) ? donnee.sites : [];
     const zone = el('div', { class: 'ed-liste' });
@@ -247,16 +249,27 @@ const EDITEURS = {
       const adr = Array.isArray(s.adresse) ? s.adresse : [];
       const champsAdr = [0, 1].concat(adr.slice(2).map((_, i) => i + 2)).map(i =>
         champ('input', { type: 'text', autocomplete: 'off' }, adr[i] || ''));
-      const tel = champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, s.telephone || '');
+      const tel = 'telephone' in s ? champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, s.telephone || '') : null;
       const lieu = s.nom || s.cle;
       const aides = carte.aides || {};
       zone.appendChild(el('div', { class: 'ed-carte' }, [
         el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: lieu })]),
         ...champsAdr.map((c, i) => groupe(lieu + ' — adresse, ligne ' + (i + 1), c, i === champsAdr.length - 1 ? aides.adresse : null)),
-        groupe(lieu + ' — téléphone', tel, [aides.telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' '))
+        tel ? groupe(lieu + ' — téléphone', tel, [aides.telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ')) : null
       ]));
       return { site: s, champsAdr, tel, adr };
     });
+    const communs = donnee && donnee.telephones && typeof donnee.telephones === 'object' ? donnee.telephones : null;
+    const TYPES = [['standard', 'Standard'], ['portable', 'Portable']];
+    const champsTel = communs ? TYPES.map(([type, libelle]) => ({ type, libelle,
+      c: champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, communs[type] || '') })) : [];
+    if (communs){
+      const aide = [(carte.aides || {}).telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ');
+      zone.appendChild(el('div', { class: 'ed-carte' }, [
+        el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: 'Téléphones — Marseille & Aix' })]),
+        ...champsTel.map((t, i) => groupe(t.libelle, t.c, i === champsTel.length - 1 ? aide : null))
+      ]));
+    }
     return {
       noeud: zone,
       lire(){
@@ -265,11 +278,19 @@ const EDITEURS = {
           const inchangee = champsAdr.every(c => c.value === c.dataset.initial);
           const adresse = inchangee ? adr : champsAdr.map(c => c.value.trim()).filter(Boolean);
           if (!adresse.length) throw new Error('Adresse vide pour ' + nom + '.');
+          if (!tel) return { ...site, adresse };
           const telephone = garde(tel, site.telephone);
           if (!telValide(telephone)) throw new Error('Téléphone de ' + nom + ' non reconnu. Exemple : 04 91 50 01 13');
           return { ...site, adresse, telephone };
         });
-        return { ...(donnee || {}), sites: out };
+        if (!communs) return { ...(donnee || {}), sites: out };
+        const telephones = { ...communs };
+        champsTel.forEach(({ type, libelle, c }) => {
+          const num = garde(c, communs[type]);
+          if (!telValide(num)) throw new Error('Numéro ' + libelle.toLowerCase() + ' non reconnu. Exemple : 04 91 50 01 13');
+          telephones[type] = num;
+        });
+        return { ...(donnee || {}), sites: out, telephones };
       }
     };
   },

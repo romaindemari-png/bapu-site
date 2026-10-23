@@ -205,6 +205,7 @@ footer{background:var(--b);color:#fff;padding:clamp(48px,7vw,80px) 0 28px}
 .fcontact{margin-bottom:20px}
 .fplace{font-size:13px;font-weight:600;color:#fff;margin-bottom:5px}
 .ftel{font-family:"NM";font-weight:500;font-size:18px;color:#fff;display:inline-block;margin-bottom:6px}
+.fnum{display:flex;align-items:baseline;gap:9px;margin-bottom:2px}.fnum .ftel{margin-bottom:0}.ftype{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.8)}.fnum:last-of-type{margin-bottom:6px}
 .faddr{font-size:14px;line-height:1.45;color:#fff;max-width:26ch}
 .fpartners{list-style:none;display:flex;flex-direction:column;gap:10px}
 .fpartners li{font-size:15px;font-weight:500;color:#fff}

@@ -11,6 +11,8 @@
      #cms-texte-<cle>        conteneur : ses <p> sont remplacés par textes.<cle>[]
      .cms-tel-<site>         texte = coordonnees.sites[cle=<site>].telephone
      .cms-tellink-<site>     href  = tel: dérivé du téléphone
+     .cms-tel-<type>         texte = coordonnees.telephones.<type> (numéros communs à tous
+     .cms-tellink-<type>     les sites, ex. standard / portable) ; href = tel: dérivé
      .cms-adr-<site>         adresse, lignes séparées par <br>
      .cms-adrl-<site>        adresse sur une ligne : une <span class="adr-l"> par ligne,
                              séparées par une espace (le CSS peut empêcher la coupure
@@ -69,6 +71,18 @@
   }
 
   function appliquerCoordonnees(coord) {
+    /* Numéros communs à tous les sites (optionnel) : coord.telephones = {type: numéro}.
+       S'ajoute au téléphone par site, qui reste géré plus bas (fichiers sans `telephones`). */
+    var tels = coord && coord.telephones && typeof coord.telephones === 'object' ? coord.telephones : {};
+    Object.keys(tels).forEach(function (type) {
+      var num = tels[type];
+      if (!nonVide(num)) return;
+      var href = telHref(num);
+      each('.cms-tel-' + type, function (el) { el.textContent = num; });
+      if (href) each('.cms-tellink-' + type, function (el) { el.setAttribute('href', href); });
+      else console.warn('[LeLab] Téléphone non reconnu (' + type + ') : lien d\'appel laissé tel quel');
+    });
+
     var sites = coord && Array.isArray(coord.sites) ? coord.sites : [];
     sites.forEach(function (s) {
       if (!s || !nonVide(s.cle)) return;
