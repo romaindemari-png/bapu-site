@@ -317,6 +317,9 @@ const EDITEURS = {
     const urg = interrupteur('Afficher les numéros d’urgence', o.urgences);
     const groupeLabel = groupe('Petit intitulé (au-dessus du titre)', label);
     const groupeUrg = el('div', { class: 'fld' }, [urg.noeud, el('p', { class: 'fld-aide', text: 'Les numéros eux-mêmes ne se modifient pas ici.' })]);
+    /* ⚠️ C'est la CARTE qu'on masque en bannière, pas seulement le champ : masquer le seul
+          champ laissait une carte vide (padding + bordure, 34 px) sous les dates. */
+    const carteUrg = el('div', { class: 'ed-carte' }, [groupeUrg]);
     const apercu = el('p', { class: 'ed-etat' });
 
     const MODELES = [
@@ -346,7 +349,7 @@ const EDITEURS = {
     }
     function majApercu(){
       const r = lireBrut();
-      groupeLabel.hidden = groupeUrg.hidden = r.type === 'banniere';
+      groupeLabel.hidden = carteUrg.hidden = r.type === 'banniere';
       const e = etatMessage(r);
       apercu.textContent = 'Avec ces réglages : ' + e.val + ' — ' + e.sub;
       apercu.dataset.etat = e.val;
@@ -357,7 +360,7 @@ const EDITEURS = {
         groupe('Titre', titre), groupe('Texte', texte, 'Mettez un passage **entre deux astérisques** pour l’écrire en gras.')]),
       el('div', { class: 'ed-carte' }, [el('div', { class: 'fld-duo' }, [groupe('Du', debut), groupe('Au (inclus)', fin)]),
         el('p', { class: 'fld-aide', text: 'Laissez vide pour commencer tout de suite / ne jamais s’arrêter. Le message s’éteint seul après la date de fin.' })]),
-      el('div', { class: 'ed-carte' }, [groupeUrg])
+      carteUrg
     ]);
     noeud.addEventListener('input', majApercu);
     noeud.addEventListener('change', majApercu);

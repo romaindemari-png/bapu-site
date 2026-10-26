@@ -123,6 +123,7 @@ body:not(.authed) .app{display:none}
 .ed-apercu q{font-style:italic;quotes:"« " " »"}
 .ed-liste{display:flex;flex-direction:column;gap:var(--sp-3)}
 .ed-carte{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--sp-4);display:flex;flex-direction:column;gap:var(--sp-4)}
+.ed-carte[hidden]{display:none}
 .ed-carte-h{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)}
 .ed-num{font-size:15px;font-weight:700}
 .ed-suppr{font-size:12.5px;font-weight:600;color:var(--red);min-height:44px;padding:0 var(--sp-2)}
