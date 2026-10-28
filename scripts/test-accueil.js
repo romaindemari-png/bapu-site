@@ -155,6 +155,8 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
         reste: /Le reste du site, c’est nous\./.test(document.body.innerText),
         mail: studio ? studio.getAttribute('href') : null,
         insta: /instagram/i.test(document.documentElement.innerHTML), plus: /lelab-plus|LeLab\+/i.test(document.documentElement.innerHTML),
+        boutonAccueil: !!document.querySelector('#screen-monsite button.btn, #btnAccueil'), toutEnLigne: /Tout est en ligne/.test(document.getElementById('screen-monsite').innerText),
+        pastille: (document.getElementById('chipEtat') || {}).textContent,
       };
     });
     ok('coquille : plus de sidebar, de nav du bas, d’écran Accueil, d’ancienne barre mobile', !r.sidebar && !r.navBas && !r.dashboard && !r.topbarM, JSON.stringify(r));
@@ -163,6 +165,7 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     ok('coquille : « Le reste du site, c’est nous. »', r.reste);
     ok('coquille : « Demander au studio » → mailto:contact@lestudmarseille.fr', r.mail && r.mail.startsWith('mailto:contact@lestudmarseille.fr'), r.mail);
     ok('coquille : aucune trace d’Instagram ni de LeLab+', !r.insta && !r.plus, JSON.stringify(r));
+    ok('accueil : pas de bouton « Tout est en ligne » ; l’état est dans la pastille « En ligne »', !r.boutonAccueil && !r.toutEnLigne && r.pastille === 'En ligne', JSON.stringify([r.boutonAccueil, r.toutEnLigne, r.pastille]));
     await p.close();
   }
   ok('aucune requête vers une fonction Instagram, le studio ou Blobs', !requetes.some(u => /instagram|caption|upload-image|serve-image|moteur/i.test(u)), requetes.filter(u => /instagram|caption|upload|serve|moteur/i.test(u)).join(', '));

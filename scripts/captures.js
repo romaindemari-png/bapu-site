@@ -16,11 +16,16 @@ const SORTIE = process.argv[3] || '.';
 const PREFIXE = process.argv[4] || 'admin';
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const MSG = "openEdit(toutesLesCartes().find(c => c.edit === 'message'))";
+const ADR = "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))";
 const ECRANS = [
   ['1-accueil', ''],
   ['2-volet-compte', 'basculerVoletCompte()'],
+  ['2b-accueil-publication', "window.__LELAB_TEMPS = 1; const p = debutPublication('coordonnees'); publicationEnvoyee(p, { ...donnees.coordonnees, x: 1 })"],
   ['3-adresses', "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))"],
   ['4-message', MSG],
+  ['6-publier-modifie', ADR + "; const t = document.querySelectorAll('#editCorps input[type=tel]')[1]; t.value = '06 12 34 56 78'; t.dispatchEvent(new Event('input', { bubbles: true }))"],
+  ['7-publier-envoye', ADR + "; window.__LELAB_TEMPS = 1; const p = debutPublication('coordonnees'); publicationEnvoyee(p, { ...donnees.coordonnees, x: 1 })"],
+  ['8-publier-en-ligne', ADR + "; const p = debutPublication('coordonnees'); p.etat = 'envoye'; annoncerEnLigne(p)"],
   ['5-connexion', "document.body.classList.remove('authed')"],
 ];
 

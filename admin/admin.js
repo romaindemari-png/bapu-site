@@ -137,7 +137,9 @@ function renderAccueil(){
   const carteMsg = toutesLesCartes().find(c => c.type === 'message');
   const info = carteMsg ? donnees[carteMsg.fichier] : null;
   const e = carteMsg ? etatDuMessage(info, maintenant) : { etat: 'inconnu' };
-  if (e.raison === 'expire'){
+  if (publicationEnCours()){
+    etat.textContent = 'Une publication est en cours.';
+  } else if (e.raison === 'expire'){
     etat.append('Votre message s’arrête ', el('em', { text: quandFin(info.dateFin, e.reste) }), '.');
   } else {
     etat.textContent = e.raison === 'termine' ? 'Votre message est terminé.' : 'Votre site est à jour.';
@@ -145,6 +147,7 @@ function renderAccueil(){
   document.getElementById('avatarInit').textContent = initialesAvatar();
   document.getElementById('voletNom').textContent = prenomDuProfil() || cabinet.nom || '';
   document.getElementById('voletCabinet').textContent = prenomDuProfil() ? (cabinet.nom || '') : '';
+  majPastille();
 }
 
 /* ═══ LE VOLET DU COMPTE — ouvert par l'avatar, fermé dehors, par Échap ou par un second toucher ═══ */
@@ -495,13 +498,15 @@ const EDITEURS = {
       et le publier écraserait les données du client. 'absent' = création, autorisée. */
 function lectureEnPanne(carte){ return etatDonnees[carte.fichier] === 'erreur'; }
 
-function openEdit(carte){
+/* surPlace : l'éditeur repart des données en mémoire SANS changer d'écran ni remonter la page
+   (après un envoi : la nouvelle référence est ce qu'on vient d'envoyer ; « Annuler » : ce qui est en ligne). */
+function openEdit(carte, surPlace){
   const fab = EDITEURS[carte.type];
   if (!fab){ showToast('Cet élément ne se modifie pas encore ici.'); return; }
   if (lectureEnPanne(carte)){ showToast('Lecture impossible pour le moment — rechargez la page avant de modifier.'); return; }
   const origine = donnees[carte.fichier];
   const ed = fab(carte, origine);
-  edition = { carte, origine, lire: ed.lire, sale: false };
+  edition = { carte, origine, lire: ed.lire, sale: false, n: 0 };
   document.getElementById('editTitre').textContent = carte.action;
   document.getElementById('editSub').textContent = carte.emplacement ? '' : carte.sub;
   document.getElementById('editSub').hidden = !!carte.emplacement;
@@ -510,7 +515,7 @@ function openEdit(carte){
   corps.textContent = '';
   corps.appendChild(ed.noeud);
   majBoutonPublier();
-  showScreen('edit');
+  if (!surPlace) showScreen('edit');
   corps.querySelectorAll('textarea').forEach(ajusterHauteur);   // après affichage : scrollHeight vaut 0 sur un écran masqué
 }
 
@@ -531,55 +536,246 @@ function rendreEmplacement(e){
   ]));
 }
 
+/* Le nombre de changements = les valeurs (feuilles) qui diffèrent entre ce qu'on écrirait et ce qu'on a lu.
+   L'id du message n'en est pas un : il se régénère quand le titre, le texte ou les dates changent. */
+function compterChangements(a, b, racine = true){
+  if (a === b) return 0;
+  const objet = v => v !== null && typeof v === 'object';
+  if (!objet(a) || !objet(b)) return 1;
+  let n = 0;
+  new Set([...Object.keys(a), ...Object.keys(b)]).forEach(k => {
+    if (racine && k === 'id') return;
+    n += (objet(a[k]) || objet(b[k])) ? compterChangements(a[k], b[k], false) : (a[k] === b[k] ? 0 : 1);
+  });
+  return n;
+}
 /* Modifié = ce qu'on écrirait diffère de ce qu'on a lu (une saisie invalide compte comme modifiée). */
 function signalerSaisie(){
   if (!edition) return;
-  let sale;
-  try { sale = JSON.stringify(edition.lire()) !== JSON.stringify(edition.origine); } catch(e){ sale = true; }
-  edition.sale = sale;
+  erreurPublication = null;   // la phrase d'échec tient jusqu'au geste suivant
+  try { edition.n = compterChangements(edition.lire(), edition.origine); }
+  catch(e){ edition.n = Math.max(1, edition.n || 0); }
+  edition.sale = edition.n > 0;
   majBoutonPublier();
 }
+/* « Annuler » : l'éditeur revient à ce qui est en ligne. */
+function annulerEdition(){
+  if (!edition) return;
+  erreurPublication = null;
+  openEdit(edition.carte, true);
+}
+
+/* ═══ PUBLIER JUSQU'AU BOUT (B4, LELAB-DESIGN §6) — reprise du bout 6 de bistrot-sassy ═══════════════
+   Un bouton à quatre états, partout le même : repos (contour, « Tout est en ligne ») · modifié (à voir,
+   « Publier », dessous « n changements · Annuler ») · envoi (le jaune monte) · en ligne (« ✓ C'est en ligne »).
+   ⚠️ « EN LIGNE » SE CONSTATE, IL NE SE PRÉDIT PAS. Au 200 de save-data, le changement est ÉCRIT (commit) ;
+      il n'est VISIBLE qu'une fois le site redéployé. On relit donc le fichier PUBLIC (/_data/<fichier>.json,
+      cache:'no-store' + paramètre anti-cache) toutes les 3 s. « En ligne » = le JSON public égal, clé par
+      clé, à ce qu'on a envoyé. Rien d'autre ne l'affiche. Aucune promesse de délai avant la preuve.
+   ⚠️ 120 s sans preuve → repos SANS dire « en ligne » (« Envoyé », phrase du délai long).
+   ⚠️ LA RELECTURE NE DÉPEND PAS DE L'ÉCRAN : elle continue si l'on revient à « Mon site » ; la phrase
+      d'accueil dit « Une publication est en cours. » et la pastille « Publication… », jusqu'à la preuve.
+      Pas de bouton sur l'accueil (décidé le 28/10) : l'état y est porté par la pastille et la phrase.
+   ⚠️ PLUS DE FERMETURE AUTOMATIQUE À 1,2 s : l'éditeur reste ouvert et repart de ce qu'on vient d'envoyer.
+   Remplissage : 0,85 × (1 − e^(−t/τ)), τ = 40 s / ln 20 ; jamais au-delà de 85 % sans preuve.
+   HORLOGE DE TEST : window.__LELAB_TEMPS (0 < k ≤ 1) multiplie les trois durées (scripts/test-publier.js).
+   ⚠️ ABSENTE EN PROD → durées nominales. */
+const PUBLIER_INTERVALLE = 3000, PUBLIER_DELAI_MAX = 120000, PUBLIER_COURBE = 40000, PUBLIER_PLAFOND = 0.85;
+const IDS_EDITION = { btn: 'btnPublier', ligne: 'publierLigne' };
+const PHRASE_REPOS = 'Modifiez un champ et le bouton s’allume.';
+const PHRASE_ENVOI = 'Envoi en cours.';
+const PHRASE_ENVOYE = 'Envoyé. On vérifie que c’est en ligne…';
+const PHRASE_EN_LIGNE = 'Vos visiteurs le voient déjà.';
+const PHRASE_LONGUE = 'Envoyé. La mise en ligne prend plus de temps que d’habitude, elle se fera seule.';
+const PHRASE_ECHEC = 'Ça n’est pas parti. Vos changements sont gardés, réessayez.';
+function echelleTemps(){
+  const k = window.__LELAB_TEMPS;
+  return typeof k === 'number' && k > 0 && k <= 1 ? k : 1;
+}
+function dureesPublier(){
+  const k = echelleTemps();
+  return { courbe: PUBLIER_COURBE * k, intervalle: PUBLIER_INTERVALLE * k, delaiMax: PUBLIER_DELAI_MAX * k };
+}
+const publications = {};        // { <fichier>: { t0, etat:'envoi'|'envoye'|'fin', attendu, duree, … } }
+const statutPublication = {};   // { <fichier>: 'en-cours' | 'longue' }
+let erreurPublication = null;   // le fichier dont l'envoi vient d'échouer (phrase d'échec jusqu'au geste suivant)
+function mouvementReduit(){ return matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function publicationEnCours(){ return Object.values(statutPublication).some(s => s === 'en-cours'); }
+function egalCleParCle(a, b){
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length !== kb.length) return false;
+  return ka.every(k => Object.prototype.hasOwnProperty.call(b, k) && egalCleParCle(a[k], b[k]));
+}
+
+/* Le bouton et la ligne dessous. ligne : une phrase, un nombre (« n changements · Annuler »), ou null (inchangée). */
+function etatPublier(ids, classe, libelle, ligne, actif){
+  const btn = document.getElementById(ids.btn), l = document.getElementById(ids.ligne);
+  if (btn){
+    btn.classList.remove('pub--repos', 'pub--a-voir', 'pub--envoi', 'pub--envoye', 'pub--confirme', 'remplit');
+    btn.classList.add(classe); btn.disabled = !actif;
+    delete btn.dataset.pub; delete btn.dataset.confirme; delete btn.dataset.remplissage;
+    btn.textContent = '';
+    btn.append(el('span', { class: 'pub-txt', text: libelle }), el('span', { class: 'pub-anneau', 'aria-hidden': 'true' }));
+    btn.dataset.libelle = libelle;   // la copie encre du remplissage (::after)
+  }
+  if (l && ligne !== null){
+    const ph = l.querySelector('.pub-phrase'), cp = l.querySelector('.pub-compte');
+    if (typeof ligne === 'number' && cp){
+      cp.querySelector('.pub-n').textContent = ligne + ' changement' + (ligne > 1 ? 's' : '') + ' · ';
+      cp.hidden = false; ph.hidden = true;
+    } else { ph.textContent = ligne; ph.hidden = false; if (cp) cp.hidden = true; }
+  }
+}
+function remplissage(pub, t){
+  if (pub.etat === 'fin') return Math.min(1, pub.fDepart + (1 - pub.fDepart) * Math.min(1, (t - pub.tEtat) / 350));
+  return PUBLIER_PLAFOND * (1 - Math.exp(-(t - pub.t0) / (pub.duree.courbe / Math.log(20))));
+}
+function boutonsDe(fichier){
+  const b = document.getElementById(IDS_EDITION.btn);
+  return b && b.dataset.pub === fichier ? [b] : [];
+}
+function peindreRemplissage(btn, f, t){
+  const h = btn.offsetHeight || 58, s = (1 - f) * (h + 8) - 8, vx = (t / 25) % 40;
+  btn.style.setProperty('--masque-pos', vx.toFixed(1) + 'px ' + s.toFixed(1) + 'px, 0px ' + (s + 7).toFixed(1) + 'px');
+  btn.dataset.remplissage = String(f);   // valeur brute : un arrondi afficherait un 85 % jamais atteint
+}
+let boucleRemplissage = 0;
+function animerPublications(){
+  boucleRemplissage = 0;
+  const t = performance.now();
+  let encore = false;
+  Object.values(publications).forEach(pub => {
+    const f = remplissage(pub, t);
+    pub.f = f;
+    boutonsDe(pub.fichier).forEach(btn => { if (btn.classList.contains('remplit')) peindreRemplissage(btn, f, t); });
+    if (pub.etat === 'fin' && f >= 1 && !pub.annonce){ pub.annonce = true; annoncerEnLigne(pub); return; }
+    encore = true;
+  });
+  if (encore) boucleRemplissage = requestAnimationFrame(animerPublications);
+}
+function relancerBoucle(){ if (!boucleRemplissage) boucleRemplissage = requestAnimationFrame(animerPublications); }
+/* Pose l'état d'une publication en vol sur le bouton de l'éditeur. */
+function peindrePublication(pub, ids){
+  const btn = document.getElementById(ids.btn);
+  if (!btn) return;
+  if (pub.etat === 'envoi') etatPublier(ids, 'pub--envoi', 'Publication…', PHRASE_ENVOI, false);
+  else etatPublier(ids, 'pub--envoye', 'Envoyé · mise en ligne…', PHRASE_ENVOYE, false);
+  btn.dataset.pub = pub.fichier;
+  if (!mouvementReduit()){ btn.classList.add('remplit'); peindreRemplissage(btn, remplissage(pub, performance.now()), performance.now()); }
+}
+/* Le bouton de l'éditeur, selon ses changements et la publication de SON fichier. */
 function majBoutonPublier(){
-  const b = document.getElementById('btnPublier');
-  b.disabled = !edition || !edition.sale;
-  b.textContent = 'Publier les modifications';
+  if (!edition) return;
+  const f = edition.carte.fichier, n = edition.sale ? edition.n : 0, pub = publications[f];
+  if (pub && pub.etat === 'envoi') return peindrePublication(pub, IDS_EDITION);
+  if (n === 0 && pub && pub.etat === 'envoye') return peindrePublication(pub, IDS_EDITION);
+  if (n === 0 && pub && pub.etat === 'fin') return;   // le dernier centimètre, puis « ✓ C'est en ligne »
+  if (n === 0 && statutPublication[f] === 'longue') etatPublier(IDS_EDITION, 'pub--repos', 'Envoyé', PHRASE_LONGUE, false);
+  else if (n === 0) etatPublier(IDS_EDITION, 'pub--repos', 'Tout est en ligne', PHRASE_REPOS, false);
+  else etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', erreurPublication === f ? PHRASE_ECHEC : n, true);
+}
+/* La pastille de l'accueil : « Publication… » tant qu'une publication est en vol (envoi, ou envoyée sans
+   preuve), « Envoyé » si la preuve tarde au-delà du délai, sinon « En ligne ». Pas de bouton sur l'accueil. */
+function majPastille(){
+  const chip = document.getElementById('chipEtat');
+  if (!chip) return;
+  const enVol = Object.values(publications).some(p => p.etat === 'envoi' || p.etat === 'envoye');
+  const longue = Object.values(statutPublication).includes('longue');
+  chip.classList.toggle('etat-chip--en-ligne', !enVol && !longue);
+  chip.classList.toggle('etat-chip--envoi', enVol || longue);
+  chip.textContent = enVol ? 'Publication…' : longue ? 'Envoyé' : 'En ligne';
+}
+function debutPublication(fichier){
+  const pub = { fichier, t0: performance.now(), etat: 'envoi', f: 0, duree: dureesPublier() };
+  publications[fichier] = pub;
+  delete statutPublication[fichier];
+  majBoutonPublier(); majPastille();
+  relancerBoucle();
+  return pub;
+}
+/* save-data a répondu 200 : on sait ce qui doit apparaître ; on va le constater. */
+function publicationEnvoyee(pub, attendu){
+  if (publications[pub.fichier] !== pub) return;
+  pub.etat = 'envoye'; pub.attendu = attendu; pub.tEnvoi = Date.now();
+  statutPublication[pub.fichier] = 'en-cours';
+  majBoutonPublier(); renderAccueil();
+  pub.minuteur = setTimeout(() => relirePublic(pub), pub.duree.intervalle);
+}
+async function relirePublic(pub){
+  if (publications[pub.fichier] !== pub) return;   // remplacée par une publication plus récente
+  let lu = null;
+  try {
+    const r = await fetch('/_data/' + pub.fichier + '.json?t=' + Date.now(), { cache: 'no-store' });
+    if (r.ok) lu = await r.json();
+  } catch (_) { lu = null; }
+  if (publications[pub.fichier] !== pub) return;
+  if (lu !== null && egalCleParCle(lu, pub.attendu)) return confirmerPublication(pub);
+  if (Date.now() - pub.tEnvoi + pub.duree.intervalle > pub.duree.delaiMax) return publicationLongue(pub);
+  pub.minuteur = setTimeout(() => relirePublic(pub), pub.duree.intervalle);
+}
+function confirmerPublication(pub){
+  delete statutPublication[pub.fichier];
+  pub.etat = 'fin'; pub.tEtat = performance.now(); pub.fDepart = remplissage({ ...pub, etat: 'envoye' }, pub.tEtat);
+  renderAccueil();
+  const remplit = boutonsDe(pub.fichier).some(b => b.classList.contains('remplit'));
+  if (mouvementReduit() || !remplit){ pub.annonce = true; annoncerEnLigne(pub); }
+  else relancerBoucle();
+}
+/* Le remplissage est à 100 % : « ✓ C'est en ligne », saut, anneau ; repos 3 s plus tard. */
+function annoncerEnLigne(pub){
+  const porte = boutonsDe(pub.fichier).length > 0;
+  delete publications[pub.fichier];
+  majPastille();
+  if (!porte) return;
+  etatPublier(IDS_EDITION, 'pub--confirme', '✓ C’est en ligne', PHRASE_EN_LIGNE, false);
+  const btn = document.getElementById(IDS_EDITION.btn);
+  btn.dataset.confirme = pub.fichier;
+  setTimeout(() => {
+    if (btn.dataset.confirme === pub.fichier && btn.classList.contains('pub--confirme')){ delete btn.dataset.confirme; majBoutonPublier(); }
+  }, 3000);
+}
+function publicationLongue(pub){
+  delete publications[pub.fichier];
+  statutPublication[pub.fichier] = 'longue';
+  majBoutonPublier(); majPastille(); renderAccueil();
+}
+/* save-data a échoué : retour à « Publier », rien n'est relu, rien n'est perdu. */
+function publicationEchouee(pub){
+  if (publications[pub.fichier] !== pub) return;
+  delete publications[pub.fichier];
+  delete statutPublication[pub.fichier];
+  erreurPublication = pub.fichier;
+  majBoutonPublier(); majPastille(); renderAccueil();
 }
 
 async function publier(){
   if (!edition) return;
-  const { carte } = edition;
+  const { carte } = edition, f = carte.fichier;
   if (lectureEnPanne(carte)){ showToast('Lecture impossible — publication annulée.'); return; }
+  if (publications[f] && publications[f].etat === 'envoi') return;   // un envoi à la fois par fichier
   let data;
   try { data = edition.lire(); } catch(e){ showToast(e.message); return; }
-  const btn = document.getElementById('btnPublier');
-  btn.disabled = true; btn.textContent = 'Publication…';
+  erreurPublication = null;
+  const ed = edition;
+  const pub = debutPublication(f);
   try {
     const res = await authedFetch('/.netlify/functions/save-data', { section: carte.edit, data });
     const r = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(r.error || ('HTTP ' + res.status));
-    /* Écriture confirmée (200) → c'est CET état qui fait foi. Jamais de relecture du
-       CDN juste après : il servirait encore l'ancien fichier pendant le redéploiement. */
-    donnees[carte.fichier] = data;
-    etatDonnees[carte.fichier] = 'ok';
-    edition.origine = data;
-    edition.sale = false;
-    renderAccueil(); renderSiteCards();
-    showToast('Modifications enregistrées — en ligne dans moins d’une minute');
-    btn.textContent = '✓ Enregistré';
-    const ecran = carte.edit;
-    setTimeout(() => { if (edition && edition.carte.edit === ecran && !edition.sale) fermerEdition(); }, 1200);
+    /* Écriture confirmée (200) → c'est CET état qui fait foi en mémoire. L'éditeur, s'il est toujours
+       ouvert sur cette carte, repart de ce qu'on vient d'envoyer ; la preuve « en ligne » viendra de la relecture. */
+    donnees[f] = data;
+    etatDonnees[f] = 'ok';
+    publicationEnvoyee(pub, data);
+    if (edition === ed) openEdit(carte, true);
+    renderSiteCards();
   } catch(e){
     console.error('[LeLab] publication', e);
-    showToast('Échec de la publication : ' + e.message);
-    btn.textContent = 'Publier les modifications';
-    btn.disabled = false;
+    publicationEchouee(pub);
   }
-}
-
-function fermerEdition(){
-  edition = null;
-  document.getElementById('editCorps').textContent = '';
-  showScreen('monsite');
 }
 
 /* Quitter un écran modifié demande confirmation (retour, navigation, déconnexion). */

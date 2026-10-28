@@ -69,7 +69,8 @@
         <div class="accueil-col">
           <!-- La phrase d'accueil dit l'état réel du site (§4). Écrite par renderAccueil(). -->
           <h1 class="accueil" id="accueilTitre"><span id="accueilSalut">Bonjour.</span><span id="accueilEtat">Votre site est à jour.</span></h1>
-          <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne">En ligne</span></div>
+          <!-- La pastille porte l'état : « En ligne », « Publication… » pendant une mise en ligne (majPastille). -->
+          <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne" id="chipEtat" role="status">En ligne</span></div>
         </div>
         <div class="cartes-col">
           <div class="cards" id="siteCards"></div>
@@ -88,8 +89,12 @@
       <p class="screen-p" id="editSub"></p>
       <div class="lieu grain-papier" id="editLieu" hidden></div>
       <div id="editCorps"></div>
+      <!-- LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) et UNE ligne dessous : la phrase d'aide au repos, « n changements ·
+           Annuler » après un changement — jamais les deux. Écrits par majBoutonPublier(). La ligne a une hauteur fixe :
+           passer de l'une à l'autre ne déplace pas le bouton. -->
       <div class="pied-publier">
-        <button class="btn btn--block" id="btnPublier" type="button" onclick="publier()" disabled>Publier les modifications</button>
+        <button class="btn btn--block btn-pub pub--repos" id="btnPublier" type="button" onclick="publier()" disabled>Tout est en ligne</button>
+        <p class="pub-ligne" id="publierLigne"><span class="pub-phrase">Modifiez un champ et le bouton s’allume.</span><span class="pub-compte" hidden><span class="pub-n"></span><button type="button" class="pub-annuler" onclick="annulerEdition()">Annuler</button></span></p>
       </div>
     </section>
   </main>
