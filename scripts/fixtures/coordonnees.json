@@ -1,0 +1,24 @@
+{
+  "sites": [
+    {
+      "cle": "marseille",
+      "nom": "Marseille",
+      "adresse": [
+        "93 Bd Camille Flammarion,",
+        "13004 Marseille"
+      ]
+    },
+    {
+      "cle": "aix",
+      "nom": "Aix-en-Provence",
+      "adresse": [
+        "Cité U des Gazelles — Pavillon 7,",
+        "31 Av. Jules Ferry, 13090 Aix-en-Provence"
+      ]
+    }
+  ],
+  "telephones": {
+    "standard": "04 91 50 01 13",
+    "portable": "07 57 01 47 03"
+  }
+}
