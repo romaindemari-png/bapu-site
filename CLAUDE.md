@@ -36,6 +36,7 @@ admin/charte.css                    Charte de l'app LeLab (tokens nuit/jour, Ins
                                     LELAB-DESIGN.md. admin.css ne lit que ses var(--…). Contrôle : admin/charte.html
 scripts/mesure-charte-tout.sh       Contraste WCAG de chaque écran de l'admin, 390 et 1280 px, nuit et jour
 scripts/captures.js                 Captures de l'admin (390/1280, nuit/jour) sur les copies gelées
+scripts/test-accueil.js             Coquille (barre, volet compte) et phrase d'accueil, horloge figée, copies gelées
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)

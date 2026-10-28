@@ -18,7 +18,7 @@ const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/M
 const MSG = "openEdit(toutesLesCartes().find(c => c.edit === 'message'))";
 const ECRANS = [
   ['1-accueil', ''],
-  ['2-mon-site', "showScreen('monsite')"],
+  ['2-volet-compte', 'basculerVoletCompte()'],
   ['3-adresses', "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))"],
   ['4-message', MSG],
   ['5-connexion', "document.body.classList.remove('authed')"],
