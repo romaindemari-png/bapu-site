@@ -68,7 +68,9 @@
       <div class="site-cadre">
         <div class="accueil-col">
           <!-- La phrase d'accueil dit l'état réel du site (§4). Écrite par renderAccueil(). -->
-          <h1 class="accueil" id="accueilTitre"><span id="accueilSalut">Bonjour.</span><span id="accueilEtat">Votre site est à jour.</span></h1>
+          <!-- Le salut est un SURTITRE (planche BAPU, 28/10) ; le titre ne porte que l'état du site. -->
+          <p class="accueil-salut" id="accueilSalut">Bonjour,</p>
+          <h1 class="accueil" id="accueilTitre"><span id="accueilEtat">Votre site est à jour.</span></h1>
           <!-- La pastille porte l'état : « En ligne », « Publication… » pendant une mise en ligne (majPastille). -->
           <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne" id="chipEtat" role="status">En ligne</span></div>
         </div>
@@ -84,7 +86,11 @@
 
     <!-- ═══ ÉDITION (un éditeur par type de bloc, construit par admin.js) ═══ -->
     <section class="screen" id="screen-edit" aria-labelledby="editTitre">
-      <button class="retour" type="button" data-screen="monsite">‹ Mon site</button>
+      <div class="edit-barre">
+        <button class="retour" type="button" data-screen="monsite">‹ Mon site</button>
+        <span class="etat-chip etat-chip--en-ligne" id="editChip" role="status">En ligne</span>
+      </div>
+      <p class="edit-sur" id="editSur" hidden></p>
       <h1 class="screen-h" id="editTitre"></h1>
       <p class="screen-p" id="editSub"></p>
       <div class="lieu grain-papier" id="editLieu" hidden></div>

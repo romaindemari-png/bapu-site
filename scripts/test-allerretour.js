@@ -170,33 +170,38 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   env = await publierEtAttendre();
   ok('coordonnees : ligne d’adresse vidée → retirée du tableau', env && JSON.stringify(env.data.sites[0].adresse) === '["93 Bd Camille Flammarion,"]', JSON.stringify(env && env.data.sites[0]));
 
-  /* 4. Message : régénération de l'id. */
+  /* 4. Message : l'id. B6 (28/10) : il se régénère quand le TITRE, le TEXTE ou les DATES changent, et seulement alors.
+        La feuille ne règle plus urgences ni label : ils sont restitués tels quels. */
   const info = JSON.parse(fichier('info'));
+  const texteMsg = (html) => p.evaluate(h => { const t = document.querySelector('#editCorps .f-msg-texte'); t.innerHTML = h; t.dispatchEvent(new Event('input', { bubbles: true })); }, html);
   await ouvrir(); await ouvrirEdition('message');
-  await p.evaluate(() => { const c = document.querySelectorAll('#editCorps input[type=checkbox]'); c[c.length - 1].click(); });   // urgences
+  await p.evaluate(() => { document.querySelector('#editCorps input[name="msg-type"][value="popup"]').click(); });
   env = await publierEtAttendre();
-  ok('message : basculer les urgences ne change PAS l’id', env && env.data.id === info.id && env.data.urgences === !info.urgences);
-  /* Chaque valeur DIFFÈRE de la copie gelée (contrôlé ci-dessous) : sinon rien ne change et l'id
-     reste, à raison — c'est ce qui faisait échouer la sonde quand elle lisait _data. */
-  for (const [nom, cle, sel, i, val] of [['titre', 'titre', 'input[type=text]', 1, 'Titre de sonde'], ['texte', 'texte', 'textarea', 0, 'Fermé **lundi**.'], ['date de fin', 'dateFin', 'input[type=date]', 1, '2026-12-31']]){
+  ok('message : changer le format ne change PAS l’id ; urgences et label restitués', env && env.data.id === info.id && env.data.type === 'popup' && env.data.urgences === info.urgences && env.data.label === info.label, JSON.stringify(env && env.data));
+  /* Chaque valeur DIFFÈRE de la copie gelée (contrôlé ci-dessous) : sinon rien ne change et l'id reste, à raison. */
+  for (const [nom, cle, geste, val, attendu] of [
+    ['titre', 'titre', v => saisirN('input.f-msg-titre', 0, v), 'Titre de sonde', 'nouvel'],
+    ['texte', 'texte', v => texteMsg(v), 'Fermé <b>lundi</b>.', 'nouvel'],
+    ['date de fin', 'dateFin', v => saisirN('input[type=date]', 1, v), '2026-12-31', 'nouvel']]){
     await ouvrir(); await ouvrirEdition('message');
-    await saisirN(sel, i, val);
+    await geste(val);
     env = await publierEtAttendre();
-    ok(`message : changer le ${nom} régénère l’id`, info[cle] !== val && env && env.data.id !== info.id && /^msg-/.test(env.data.id),
+    ok(`message : changer ${nom === 'date de fin' ? 'la' : 'le'} ${nom} ${attendu === 'nouvel' ? 'régénère l’id' : 'garde l’id'}`,
+      info[cle] !== val && env && (attendu === 'nouvel' ? env.data.id !== info.id && /^msg-/.test(env.data.id) : env.data.id === info.id),
       'copie : ' + info[cle] + ' · id envoyé : ' + (env && env.data.id));
   }
   await ouvrir(); await ouvrirEdition('message');
-  await saisirN('textarea', 0, 'Ligne 1\nFermé **lundi** <img src=x>');
+  await texteMsg('Ligne 1<br>Fermé <b>lundi</b> &lt;img src=x&gt;');
   env = await publierEtAttendre();
-  ok('message : **gras** → <strong>, retour à la ligne → <br>, le reste tel quel', env && env.data.texte === 'Ligne 1<br>Fermé <strong>lundi</strong> <img src=x>', env && env.data.texte);
+  ok('message : gras → <strong>, retour à la ligne → <br>, le reste tel quel', env && env.data.texte === 'Ligne 1<br>Fermé <strong>lundi</strong> <img src=x>', env && env.data.texte);
   ok('message : memoriser conservé, ordre des clés conservé', env && env.data.memoriser === true && JSON.stringify(Object.keys(env.data)) === JSON.stringify(Object.keys(info)));
   await ouvrir(); await ouvrirEdition('message');
   await saisirN('input[type=date]', 0, '2026-12-31'); await saisirN('input[type=date]', 1, '2026-12-01');
   env = await publierEtAttendre();
   ok('message : fin avant début → refusé, rien envoyé', env === null);
   await ouvrir(); await ouvrirEdition('message');
-  await p.evaluate(() => { const a = document.querySelector('#editCorps input[type=checkbox]'); if (!a.checked) a.click(); });   // indépendant de l'état publié
-  await saisirN('input[type=text]', 1, '');
+  await p.evaluate(() => { const a = document.querySelector('#editCorps .switch input'); if (!a.checked) a.click(); });   // indépendant de l'état publié
+  await saisirN('input.f-msg-titre', 0, '');
   env = await publierEtAttendre();
   ok('message : actif sans titre → refusé, rien envoyé', env === null);
 

@@ -23,6 +23,8 @@ const ECRANS = [
   ['2b-accueil-publication', "window.__LELAB_TEMPS = 1; const p = debutPublication('coordonnees'); publicationEnvoyee(p, { ...donnees.coordonnees, x: 1 })"],
   ['3-adresses', "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))"],
   ['4-message', MSG],
+  ['4b-message-a-corriger', MSG + "; const t = document.querySelector('#editCorps .f-msg-titre'); t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true }))"],
+  ['3b-feuille-invalide', ADR + "; const t = document.querySelector('#editCorps .f-champ[data-champ=standard]'); t.value = '12 34'; t.dispatchEvent(new Event('input', { bubbles: true })); t.focus()"],
   ['6-publier-modifie', ADR + "; const t = document.querySelectorAll('#editCorps input[type=tel]')[1]; t.value = '06 12 34 56 78'; t.dispatchEvent(new Event('input', { bubbles: true }))"],
   ['7-publier-envoye', ADR + "; window.__LELAB_TEMPS = 1; const p = debutPublication('coordonnees'); publicationEnvoyee(p, { ...donnees.coordonnees, x: 1 })"],
   ['8-publier-en-ligne', ADR + "; const p = debutPublication('coordonnees'); p.etat = 'envoye'; annoncerEnLigne(p)"],

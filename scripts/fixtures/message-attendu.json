@@ -1,0 +1,12 @@
+{
+  "actif": true,
+  "type": "popup",
+  "id": "NOUVEL-ID",
+  "dateDebut": "2026-12-21",
+  "dateFin": "2026-12-24",
+  "label": "Information",
+  "titre": "Fermeture des vacances",
+  "texte": "Le BAPU est fermé du <strong>21 au 24 décembre</strong><br>Réouverture le lundi 4 janvier.",
+  "urgences": true,
+  "memoriser": true
+}

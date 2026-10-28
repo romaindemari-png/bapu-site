@@ -14,7 +14,7 @@
         terminé mais encore actif ............. « Votre message est terminé. »
         désactivé ............................. « Votre site est à jour. »
         programmé (même s'il finit bientôt) ... « Votre site est à jour. »
-      et le salut : « Bonjour Marie-Christine. » (« Bonsoir » à partir de 18 h).
+      et le salut, en surtitre : « Bonjour Marie-Christine, » (« Bonsoir » à partir de 18 h ; sans prénom « Bonjour, »).
    2. L'AVATAR : initiales du prénom (MC), sinon celles de cabinet.nom (BA).
    3. LE VOLET COMPTE s'ouvre sous l'avatar ; le toucher ne déconnecte pas ; Échap et un
       toucher dehors le ferment ; « Se déconnecter » déconnecte.
@@ -37,11 +37,21 @@ let echecs = 0, total = 0;
 function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond ? '✓ ' : '✗ ') + nom + (cond || detail === undefined ? '' : '\n    → ' + detail)); }
 
 (async () => {
-  const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
+  /* ⚠️ JAMAIS PLUS DE 10 s SUR UN APPEL AU NAVIGATEUR, 3 s SUR UN ÉLÉMENT ATTENDU : une attente bloquée échoue
+     tout de suite, avec le NOM de ce qu'on attendait (décidé le 28/10, après un blocage sans message). */
+  const b = await puppeteer.launch({ executablePath: CHROME, headless: 'new', protocolTimeout: 10000 });
+  async function trouver(p, sel, nom){
+    const e = await p.waitForSelector(sel, { visible: true, timeout: 3000 }).catch(() => null);
+    if (!e) throw new Error('élément absent : ' + nom + ' (' + sel + ')');
+    return e;
+  }
+  async function section(nom, f){
+    try { await f(); } catch (e){ ok(nom + ' : la section a pu aller au bout', false, e.message.split('\n')[0]); }
+  }
   const requetes = [];
-  async function ouvrir({ info, config, heure } = {}){
+  async function ouvrir({ info, config, heure, largeur = 390 } = {}){
     const p = await b.newPage();
-    await p.setViewport({ width: 390, height: 844, isMobile: true, deviceScaleFactor: 2 });
+    await p.setViewport({ width: largeur, height: largeur > 960 ? 900 : 844, isMobile: largeur <= 960, deviceScaleFactor: 2 });
     const t = heure || MIDI;
     await p.evaluateOnNewDocument(T => {
       const D = Date;
@@ -59,7 +69,8 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     });
     p.on('pageerror', e => ok('aucune erreur JS', false, e.message));
     await p.goto(BASE + '/admin/', { waitUntil: 'networkidle0' });
-    await p.waitForFunction(() => document.body.classList.contains('authed') && document.querySelectorAll('#siteCards .card').length > 0, { timeout: 15000 }).catch(() => {});
+    await p.waitForFunction(() => document.body.classList.contains('authed') && document.querySelectorAll('#siteCards .card').length > 0, { timeout: 5000 })
+      .catch(() => ok('admin prêt (connecté, cartes posées) en moins de 5 s', false));
     return p;
   }
   const phrase = p => p.evaluate(() => {
@@ -70,16 +81,16 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
 
   /* 1. LA PHRASE */
   const CAS = [
-    ['message en ligne, fin lointaine', info({ dateDebut: '2026-10-20', dateFin: '2026-12-31' }), 'Bonjour Marie-Christine. | Votre site est à jour.'],
-    ['fin samedi (dans 3 jours)', info({ dateDebut: '2026-10-20', dateFin: '2026-10-31' }), 'Bonjour Marie-Christine. | Votre message s’arrête samedi.'],
-    ['fin dans 7 jours (mercredi prochain)', info({ dateDebut: '2026-10-20', dateFin: '2026-11-04' }), 'Bonjour Marie-Christine. | Votre message s’arrête mercredi 4 novembre.'],
-    ['fin dans 8 jours', info({ dateDebut: '2026-10-20', dateFin: '2026-11-05' }), 'Bonjour Marie-Christine. | Votre site est à jour.'],
-    ['fin demain', info({ dateDebut: '2026-10-20', dateFin: '2026-10-29' }), 'Bonjour Marie-Christine. | Votre message s’arrête demain.'],
-    ['fin aujourd’hui', info({ dateDebut: '2026-10-20', dateFin: '2026-10-28' }), 'Bonjour Marie-Christine. | Votre message s’arrête ce soir.'],
-    ['terminé mais encore actif', info({ dateDebut: '2026-10-01', dateFin: '2026-10-25' }), 'Bonjour Marie-Christine. | Votre message est terminé.'],
-    ['désactivé (dates passées)', info({ actif: false, dateDebut: '2026-10-01', dateFin: '2026-10-25' }), 'Bonjour Marie-Christine. | Votre site est à jour.'],
-    ['programmé, finit dans 5 jours', info({ dateDebut: '2026-11-01', dateFin: '2026-11-02' }), 'Bonjour Marie-Christine. | Votre site est à jour.'],
-    ['sans date de fin', info({ dateDebut: '', dateFin: '' }), 'Bonjour Marie-Christine. | Votre site est à jour.'],
+    ['message en ligne, fin lointaine', info({ dateDebut: '2026-10-20', dateFin: '2026-12-31' }), 'Bonjour Marie-Christine, | Votre site est à jour.'],
+    ['fin samedi (dans 3 jours)', info({ dateDebut: '2026-10-20', dateFin: '2026-10-31' }), 'Bonjour Marie-Christine, | Votre message s’arrête samedi.'],
+    ['fin dans 7 jours (mercredi prochain)', info({ dateDebut: '2026-10-20', dateFin: '2026-11-04' }), 'Bonjour Marie-Christine, | Votre message s’arrête mercredi 4 novembre.'],
+    ['fin dans 8 jours', info({ dateDebut: '2026-10-20', dateFin: '2026-11-05' }), 'Bonjour Marie-Christine, | Votre site est à jour.'],
+    ['fin demain', info({ dateDebut: '2026-10-20', dateFin: '2026-10-29' }), 'Bonjour Marie-Christine, | Votre message s’arrête demain.'],
+    ['fin aujourd’hui', info({ dateDebut: '2026-10-20', dateFin: '2026-10-28' }), 'Bonjour Marie-Christine, | Votre message s’arrête ce soir.'],
+    ['terminé mais encore actif', info({ dateDebut: '2026-10-01', dateFin: '2026-10-25' }), 'Bonjour Marie-Christine, | Votre message est terminé.'],
+    ['désactivé (dates passées)', info({ actif: false, dateDebut: '2026-10-01', dateFin: '2026-10-25' }), 'Bonjour Marie-Christine, | Votre site est à jour.'],
+    ['programmé, finit dans 5 jours', info({ dateDebut: '2026-11-01', dateFin: '2026-11-02' }), 'Bonjour Marie-Christine, | Votre site est à jour.'],
+    ['sans date de fin', info({ dateDebut: '', dateFin: '' }), 'Bonjour Marie-Christine, | Votre site est à jour.'],
   ];
   for (const [nom, inf, attendu] of CAS){
     const p = await ouvrir({ info: inf });
@@ -90,13 +101,31 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   {
     const p = await ouvrir({ heure: new Date(2026, 9, 28, 19, 0).getTime(), info: info({ dateDebut: '2026-10-20', dateFin: '2026-12-31' }) });
     const lu = await phrase(p);
-    ok('salut — « Bonsoir » à 19 h', lu === 'Bonsoir Marie-Christine. | Votre site est à jour.', lu);
+    ok('salut — « Bonsoir » à 19 h', lu === 'Bonsoir Marie-Christine, | Votre site est à jour.', lu);
     await p.close();
   }
   {
     const p = await ouvrir({ info: info({ dateDebut: '2026-10-20', dateFin: '2026-10-31' }) });
     const em = await p.evaluate(() => { const e = document.querySelector('#accueilEtat em'); return e && e.textContent; });
     ok('le jour de fin est mis en relief (em)', em === 'samedi', em);
+    await p.close();
+  }
+
+  /* 1bis. LE SALUT EST UN SURTITRE (planche BAPU, 28/10) : au-dessus du titre, hors du <h1>, Instrument Serif
+     italique, ~ la moitié du titre (24 px à 390, 36 px à 1280), couleur --texte ; le <h1> ne porte que l'état. */
+  for (const largeur of [390, 1280]){
+    const p = await ouvrir({ info: info({ dateDebut: '2026-10-20', dateFin: '2026-10-31' }), largeur });
+    const r = await p.evaluate(() => {
+      const s = document.getElementById('accueilSalut'), h = document.querySelector('#screen-monsite h1');
+      const cs = s && getComputedStyle(s), texte = getComputedStyle(document.documentElement).getPropertyValue('--texte').trim();
+      const rgb = h => { const m = h.replace('#', '').match(/../g).map(x => parseInt(x, 16)); return 'rgb(' + m.join(', ') + ')'; };
+      return { horsH1: !!s && !h.contains(s), avant: !!s && !!(s.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING),
+               h1: h.textContent.trim(), italique: cs && cs.fontStyle, police: cs && cs.fontFamily, taille: cs && parseFloat(cs.fontSize),
+               couleur: cs && cs.color, attendu: rgb(texte), em: (h.querySelector('em') || {}).textContent };
+    });
+    const taille = largeur === 390 ? 24 : 36;
+    ok(`salut (${largeur}) : surtitre au-dessus du titre, hors du <h1> ; le titre ne porte que l’état`, r.horsH1 && r.avant && r.h1 === 'Votre message s’arrête samedi.' && r.em === 'samedi', JSON.stringify(r));
+    ok(`salut (${largeur}) : Instrument Serif italique, ${taille} px, couleur --texte`, r.italique === 'italic' && /Instrument Serif/.test(r.police) && r.taille === taille && r.couleur === r.attendu, JSON.stringify(r));
     await p.close();
   }
 
@@ -109,12 +138,12 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     const cfg = FIX('config'); delete cfg.cabinet.prenom;
     const q = await ouvrir({ config: cfg });
     const r = await q.evaluate(() => ({ av: (document.getElementById('avatarInit') || {}).textContent, salut: (document.getElementById('accueilSalut') || {}).textContent }));
-    ok('sans prénom : initiales de cabinet.nom (BA) et « Bonjour. »', r.av && r.av.trim() === 'BA' && r.salut && r.salut.trim() === 'Bonjour.', JSON.stringify(r));
+    ok('sans prénom : initiales de cabinet.nom (BA) et « Bonjour, »', r.av && r.av.trim() === 'BA' && r.salut && r.salut.trim() === 'Bonjour,', JSON.stringify(r));
     await q.close();
   }
 
   /* 3. LE VOLET COMPTE */
-  {
+  await section('volet compte', async () => {
     const p = await ouvrir();
     const etat = () => p.evaluate(() => {
       const v = document.getElementById('voletCompte'), a = document.getElementById('avatarInit');
@@ -123,23 +152,27 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
                dessous: !!(rv && ra && rv.top >= ra.bottom - 1), expanded: a && a.getAttribute('aria-expanded'),
                nom: v && (v.querySelector('#voletNom') || {}).textContent };
     });
-    const avatar = await p.$('#avatarInit');
-    ok('volet : fermé au départ', avatar && !(await etat()).ouvert);
-    if (avatar){
+    const avatar = await trouver(p, '#avatarInit', 'l’avatar');
+    ok('volet : fermé au départ', !(await etat()).ouvert);
+    {
       await avatar.click();
       let e = await etat();
       ok('volet : le toucher sur l’avatar l’ouvre, sous l’avatar, et ne déconnecte pas', e.ouvert && e.dessous && e.authed && e.expanded === 'true', JSON.stringify(e));
       ok('volet : porte le prénom', e.nom && e.nom.includes('Marie-Christine'), JSON.stringify(e));
       await p.keyboard.press('Escape');
       ok('volet : Échap le ferme', !(await etat()).ouvert);
-      await avatar.click(); await p.mouse.click(30, 700);
+      /* Le toucher « dehors » se pose sur le bord gauche du TITRE d'état (rien à ouvrir, hors du volet), pas à des
+         coordonnées fixes : à (30, 700), il tombait sur la carte du message depuis que le salut est un surtitre. */
+      await avatar.click();
+      const boite = await (await trouver(p, '#accueilTitre', 'le titre d’état')).boundingBox();
+      await p.mouse.click(boite.x + 8, boite.y + 8);   // le bord gauche : le volet, ancré à droite, couvre le reste
       e = await etat();
       ok('volet : un toucher dehors le ferme, toujours connecté', !e.ouvert && e.authed, JSON.stringify(e));
-      await avatar.click(); await p.click('#voletCompte .vc-sortie');
+      await avatar.click(); await (await trouver(p, '#voletCompte .vc-sortie', 'le bouton « Se déconnecter »')).click();
       ok('volet : « Se déconnecter » déconnecte', !(await etat()).authed);
     }
     await p.close();
-  }
+  });
 
   /* 4. LA COQUILLE */
   {
