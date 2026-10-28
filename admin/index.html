@@ -6,6 +6,7 @@
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
 <title>LeLab — Votre espace</title>
+<link rel="stylesheet" href="charte.css">
 <link rel="stylesheet" href="admin.css">
 <!-- Cœur auth + lecture : copie à l'octet du master LeLab (voir son en-tête). -->
 <script src="lelab-auth.js"></script>
@@ -18,10 +19,13 @@
 </script>
 </head>
 <body>
+<div class="flou-violet" aria-hidden="true"></div>
+<div class="grain-fond" aria-hidden="true"></div>
 
 <!-- ═══ LOGIN (passerelle Netlify Identity) — ids attendus par lelab-auth.js ═══ -->
 <div id="login-gate">
-  <img id="logo-login" src="assets/logo-lelab-noir.png" alt="LeLab" width="200" height="155">
+  <img class="logo-login logo-nuit" src="assets/logo-lelab-blanc.png" alt="LeLab" width="120" height="81" loading="lazy">
+  <img class="logo-login logo-jour" src="assets/logo-lelab-noir.png" alt="LeLab" width="120" height="81" loading="lazy">
   <h1>Votre espace</h1>
   <p>Connectez-vous pour modifier votre site.</p>
   <form id="login-form" onsubmit="return customLogin(event)">
@@ -41,7 +45,7 @@
 <div class="app">
   <!-- ═══ SIDEBAR (desktop) ═══ -->
   <aside class="sidebar">
-    <div class="logo-wrap"><img src="assets/logo-lelab-blanc.png" alt="LeLab" width="112" height="87"></div>
+    <div class="logo-wrap"><img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="72" height="40" loading="lazy"><img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="72" height="40" loading="lazy"></div>
     <nav class="nav-list" aria-label="Navigation">
       <button class="nav-item" data-screen="dashboard" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
@@ -63,7 +67,8 @@
 
   <!-- ═══ TOPBAR (mobile) ═══ -->
   <header class="topbar-m">
-    <img src="assets/logo-lelab-noir-h.png" alt="LeLab" width="120" height="38">
+    <img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="54" height="30" loading="lazy">
+    <img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="54" height="30" loading="lazy">
     <div class="topbar-r">
       <div class="av" aria-hidden="true"></div>
       <button class="logout" type="button" onclick="doLogout()" title="Déconnexion" aria-label="Déconnexion">
@@ -78,12 +83,12 @@
       <p class="hello-date" id="helloDate"></p>
       <h1 class="hello" id="hello"><strong>Bonjour<br><span id="helloName"></span>,</strong><br>que voulez-vous faire aujourd'hui&nbsp;?</h1>
       <div class="tiles">
-        <button class="tile tile--site" type="button" data-screen="monsite">
+        <button class="tile tile--site grain-a-voir" type="button" data-screen="monsite">
           <svg class="tile-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 8h10M7 11h6M9 20h6M12 16v4"/></svg>
           <span class="tile-t">Modifier<br>mon site</span>
           <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
         </button>
-        <div class="tile tile--etat" id="tileMessage" hidden>
+        <div class="tile tile--etat grain-papier" id="tileMessage" hidden>
           <span class="etat-lbl">Message d'info</span>
           <span class="etat-val" id="etatMessage"></span>
           <span class="etat-sub" id="etatMessageSub"></span>
@@ -105,7 +110,7 @@
       <button class="retour" type="button" data-screen="monsite">← Mon site</button>
       <h1 class="screen-h" id="editTitre"></h1>
       <p class="screen-p" id="editSub"></p>
-      <div class="lieu" id="editLieu" hidden></div>
+      <div class="lieu grain-papier" id="editLieu" hidden></div>
       <div id="editCorps"></div>
       <div class="pied-publier">
         <button class="btn btn--block" id="btnPublier" type="button" onclick="publier()" disabled>Publier les modifications</button>
@@ -115,7 +120,7 @@
 
   <!-- Confirmation : quitter un écran modifié -->
   <div class="quitter" id="quitter" hidden role="dialog" aria-modal="true" aria-labelledby="quitterT">
-    <div class="quitter-boite">
+    <div class="quitter-boite grain-papier">
       <p class="quitter-t" id="quitterT">Quitter sans publier&nbsp;?</p>
       <p class="quitter-p">Vos modifications ne sont pas encore en ligne. Elles seront perdues.</p>
       <div class="quitter-btns">

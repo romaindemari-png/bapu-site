@@ -127,7 +127,7 @@ function renderSiteCards(){
   }
   cartes.forEach(c => {
     const enPanne = etatDonnees[c.fichier] === 'erreur';
-    const carte = el('button', { class: 'card' + (enPanne ? ' card--panne' : ''), type: 'button', 'data-edit': c.edit }, [
+    const carte = el('button', { class: 'card grain-papier' + (enPanne ? ' card--panne' : ''), type: 'button', 'data-edit': c.edit }, [
       el('span', { class: 'card-ico' }, [svgPicto(c.picto)]),
       el('span', { class: 'card-t', text: c.action }),
       el('span', { class: 'card-sub', text: enPanne ? 'Lecture impossible pour le moment' : c.sub })
@@ -213,7 +213,7 @@ const EDITEURS = {
       const repere = el('p', { class: 'ed-apercu' }, origine
         ? [el('span', { text: 'Sur le site actuellement : ' }), el('q', { text: debutDe(origine.texte) })]
         : [el('span', { text: 'Nouveau paragraphe — il s’ajoutera à la suite des autres.' })]);
-      const bloc = el('div', { class: 'ed-carte' }, [el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num' }), suppr]), repere, groupe('Texte', ta), gras.noeud]);
+      const bloc = el('div', { class: 'ed-carte grain-papier' }, [el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num' }), suppr]), repere, groupe('Texte', ta), gras.noeud]);
       const ligne = { origine, ta, gras: gras.box, bloc, libelle };
       suppr.addEventListener('click', () => {
         if (lignes.length <= 1){ showToast('Il faut au moins un paragraphe.'); return; }
@@ -252,7 +252,7 @@ const EDITEURS = {
       const tel = 'telephone' in s ? champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, s.telephone || '') : null;
       const lieu = s.nom || s.cle;
       const aides = carte.aides || {};
-      zone.appendChild(el('div', { class: 'ed-carte' }, [
+      zone.appendChild(el('div', { class: 'ed-carte grain-papier' }, [
         el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: lieu })]),
         ...champsAdr.map((c, i) => groupe(lieu + ' — adresse, ligne ' + (i + 1), c, i === champsAdr.length - 1 ? aides.adresse : null)),
         tel ? groupe(lieu + ' — téléphone', tel, [aides.telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ')) : null
@@ -265,7 +265,7 @@ const EDITEURS = {
       c: champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, communs[type] || '') })) : [];
     if (communs){
       const aide = [(carte.aides || {}).telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ');
-      zone.appendChild(el('div', { class: 'ed-carte' }, [
+      zone.appendChild(el('div', { class: 'ed-carte grain-papier' }, [
         el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: 'Téléphones — Marseille & Aix' })]),
         ...champsTel.map((t, i) => groupe(t.libelle, t.c, i === champsTel.length - 1 ? aide : null))
       ]));
@@ -319,7 +319,7 @@ const EDITEURS = {
     const groupeUrg = el('div', { class: 'fld' }, [urg.noeud, el('p', { class: 'fld-aide', text: 'Les numéros eux-mêmes ne se modifient pas ici.' })]);
     /* ⚠️ C'est la CARTE qu'on masque en bannière, pas seulement le champ : masquer le seul
           champ laissait une carte vide (padding + bordure, 34 px) sous les dates. */
-    const carteUrg = el('div', { class: 'ed-carte' }, [groupeUrg]);
+    const carteUrg = el('div', { class: 'ed-carte grain-papier' }, [groupeUrg]);
     const apercu = el('p', { class: 'ed-etat' });
 
     const MODELES = [
@@ -355,10 +355,10 @@ const EDITEURS = {
       apercu.dataset.etat = e.val;
     }
     const noeud = el('div', { class: 'ed-liste' }, [
-      el('div', { class: 'ed-carte' }, [actif.noeud, apercu]),
-      el('div', { class: 'ed-carte' }, [el('div', { class: 'fld' }, [el('span', { class: 'fld-l', text: 'Partir d’un modèle' }), modeles]), format, groupeLabel,
+      el('div', { class: 'ed-carte grain-papier' }, [actif.noeud, apercu]),
+      el('div', { class: 'ed-carte grain-papier' }, [el('div', { class: 'fld' }, [el('span', { class: 'fld-l', text: 'Partir d’un modèle' }), modeles]), format, groupeLabel,
         groupe('Titre', titre), groupe('Texte', texte, 'Mettez un passage **entre deux astérisques** pour l’écrire en gras.')]),
-      el('div', { class: 'ed-carte' }, [el('div', { class: 'fld-duo' }, [groupe('Du', debut), groupe('Au (inclus)', fin)]),
+      el('div', { class: 'ed-carte grain-papier' }, [el('div', { class: 'fld-duo' }, [groupe('Du', debut), groupe('Au (inclus)', fin)]),
         el('p', { class: 'fld-aide', text: 'Laissez vide pour commencer tout de suite / ne jamais s’arrêter. Le message s’éteint seul après la date de fin.' })]),
       carteUrg
     ]);
