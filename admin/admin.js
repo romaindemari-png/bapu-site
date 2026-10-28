@@ -395,11 +395,15 @@ const EDITEURS = {
     });
     const legende = el('p', { class: 'f-legende', text: 'Ce que vos visiteurs liront : les numéros sur les boutons d’appel (menu, haut de page, rendez-vous, infos, pied de page), les adresses dans « Adresses. » et en pied de page. La carte Google ne suit pas l’adresse : pour la changer, demandez au studio.' });
     /* La ligne d'un numéro non reconnu est marquée dès la saisie ; « Publier » attend qu'elle soit juste. */
-    function marquer(){ champsTel.forEach(({ c, li }) => li.classList.toggle('f-ligne--manque', c.value !== c.dataset.initial && !telValide(c.value.trim()))); }
+    const faux = ({ c }) => c.value !== c.dataset.initial && !telValide(c.value.trim());
+    function marquer(){ champsTel.forEach(t => t.li.classList.toggle('f-ligne--manque', faux(t))); }
     feuille.addEventListener('input', marquer);
     return {
       noeud: el('div', { class: 'ed-feuille' }, [feuille, legende]),
       titre: 'Adresses & téléphones',
+      /* Un numéro faux n'est dit QUE sous sa ligne ; le bouton, inactif, en donne le compte (B5, 28/10). */
+      aCorriger(){ return champsTel.filter(faux).length; },
+      libelleACorriger: m => m + ' numéro' + (m > 1 ? 's' : '') + ' à corriger',
       surtitre: 'Partout sur le site : menu, haut de page, rendez-vous, infos, pied de page',
       lire(){
         const out = lignes.map(({ site, champsAdr, tel, adr, nom }) => {
@@ -519,7 +523,7 @@ function openEdit(carte, surPlace){
   if (lectureEnPanne(carte)){ showToast('Lecture impossible pour le moment — rechargez la page avant de modifier.'); return; }
   const origine = donnees[carte.fichier];
   const ed = fab(carte, origine);
-  edition = { carte, origine, lire: ed.lire, sale: false, n: 0, invalide: null };
+  edition = { carte, origine, lire: ed.lire, sale: false, n: 0, invalide: null, aCorriger: 0, ed };
   /* Une FEUILLE (B5) dit elle-même son titre et où elle se voit (surtitre numéroté dans l'ordre du site) ;
      les autres éditeurs gardent l'encart « Ce que vous modifiez sur le site ». */
   const rang = ORDRE_DU_SITE.indexOf(carte.type);
@@ -574,6 +578,7 @@ function signalerSaisie(){
   erreurPublication = null;   // la phrase d'échec tient jusqu'au geste suivant
   try { edition.n = compterChangements(edition.lire(), edition.origine); edition.invalide = null; }
   catch(e){ edition.n = Math.max(1, edition.n || 0); edition.invalide = e.message; }
+  edition.aCorriger = edition.ed.aCorriger ? edition.ed.aCorriger() : 0;
   edition.sale = edition.n > 0;
   majBoutonPublier();
 }
@@ -705,6 +710,7 @@ function majBoutonPublier(){
   if (n === 0 && pub && pub.etat === 'fin') return;   // le dernier centimètre, puis « ✓ C'est en ligne »
   if (n === 0 && statutPublication[f] === 'longue') etatPublier(IDS_EDITION, 'pub--repos', 'Envoyé', PHRASE_LONGUE, false);
   else if (n === 0) etatPublier(IDS_EDITION, 'pub--repos', 'Tout est en ligne', PHRASE_REPOS, false);
+  else if (edition.aCorriger > 0) etatPublier(IDS_EDITION, 'pub--a-voir', edition.ed.libelleACorriger(edition.aCorriger), '', false);   // dit sous la ligne, compté sur le bouton
   else if (edition.invalide) etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', edition.invalide, false);   // rien ne part tant que c'est faux
   else etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', erreurPublication === f ? PHRASE_ECHEC : n, true);
 }

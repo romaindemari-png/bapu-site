@@ -13,7 +13,8 @@
       MAIN, après : portable retapé (avec des espaces autour), Aix 1re ligne modifiée, Marseille 2e
       ligne modifiée puis remise à l'identique. Le bouton annonce « 2 changements » avant l'envoi.
    3. ALLER-RETOUR : publier sans rien changer réécrit le fichier à l'octet ; une clé inconnue survit.
-   4. NUMÉRO INVALIDE : la ligne est marquée, le message le dit, « Publier » est inactif, rien ne part.
+   4. NUMÉRO INVALIDE : la ligne est marquée et le dit, SEULE ; le bouton inactif dit « 1 numéro à corriger »
+      (« 2 numéros à corriger »), sans phrase dessous ; rien ne part.
    5. LE SITE : le JSON envoyé, servi au site public, met le nouveau portable aux CINQ endroits (menu,
       haut de page, rendez-vous, infos, pied de page), lien d'appel compris ; la nouvelle adresse d'Aix
       dans « Adresses. » et dans le pied de page.
@@ -136,10 +137,17 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
       const li = document.querySelector('#editCorps .f-champ[data-champ="standard"]').closest('.f-ligne');
       const m = li.querySelector('.f-manque');
       return { marquee: li.classList.contains('f-ligne--manque'), message: m && m.getClientRects().length ? m.textContent.trim() : null,
-               actif: !document.getElementById('btnPublier').disabled, txt: document.getElementById('btnPublier').textContent.trim() };
+               actif: !document.getElementById('btnPublier').disabled, txt: document.getElementById('btnPublier').textContent.trim(),
+               dessous: document.getElementById('publierLigne').innerText.trim(),
+               fois: (document.getElementById('screen-edit').innerText.match(/non reconnu/g) || []).length };
     });
-    ok('invalide : ligne marquée, message « Numéro non reconnu… »', r.marquee && /^Numéro non reconnu/.test(r.message || ''), JSON.stringify(r));
-    ok('invalide : « Publier » inactif', r.txt === 'Publier' && !r.actif, JSON.stringify(r));
+    ok('invalide : ligne marquée, message « Numéro non reconnu… » sous la ligne', r.marquee && /^Numéro non reconnu/.test(r.message || ''), JSON.stringify(r));
+    ok('invalide : le bouton inactif dit « 1 numéro à corriger », rien dessous', r.txt === '1 numéro à corriger' && !r.actif && r.dessous === '', JSON.stringify(r));
+    ok('invalide : signalé une seule fois (sous sa ligne)', r.fois === 1, JSON.stringify(r));
+    await retaper(p, '#editCorps .f-champ[data-champ="portable"]', '06');
+    const r2 = await p.evaluate(() => ({ txt: document.getElementById('btnPublier').textContent.trim(), actif: !document.getElementById('btnPublier').disabled,
+      lignes: document.querySelectorAll('#editCorps .f-ligne--manque').length }));
+    ok('deux numéros faux : « 2 numéros à corriger », deux lignes marquées', r2.txt === '2 numéros à corriger' && !r2.actif && r2.lignes === 2, JSON.stringify(r2));
     await p.evaluate(() => publier()); await new Promise(r => setTimeout(r, 300));
     ok('invalide : rien n’est envoyé', envois.length === 0, JSON.stringify(envois));
     await p.close();
