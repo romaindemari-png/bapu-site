@@ -52,6 +52,12 @@ function toutesLesCartes(){
 /* ── Chargement : config d'abord, puis les fichiers qu'elle déclare ── */
 async function loadData(){
   const config = await _json('config');
+  /* À chaque lecture de config.json, sa chromie est gardée sur l'appareil (clé à part du choix de l'utilisateur) :
+     le script de tête l'applique au chargement suivant sans masquer la page (B7). */
+  try {
+    if (config && (config.chromie === 'jour' || config.chromie === 'nuit')) localStorage.setItem('lelab_chromie_config', config.chromie);
+    else if (config) localStorage.removeItem('lelab_chromie_config');
+  } catch (e) {}
   donnees = { config };
   const fichiers = [...new Set(toutesLesCartes().map(c => c.fichier))];
   await Promise.all(fichiers.map(async f => { donnees[f] = await _json(f); }));
