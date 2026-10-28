@@ -14,6 +14,9 @@ for L in 390 1280; do
 charte.html|/admin/charte.html|
 accueil (mon site)|/admin/|
 volet compte|/admin/|basculerVoletCompte()
+carte message à voir (terminé)|/admin/|donnees.info = { ...donnees.info, actif: true, dateDebut: '2026-01-01', dateFin: '2026-01-02' }; renderAccueil(); renderSiteCards()
+carte message masquée|/admin/|donnees.info = { ...donnees.info, actif: false }; renderAccueil(); renderSiteCards()
+carte message à jour (fenêtre)|/admin/|donnees.info = { ...donnees.info, actif: true, type: 'popup', dateDebut: '2026-01-01', dateFin: '2099-12-31' }; renderAccueil(); renderSiteCards()
 édition coordonnées|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))
 édition message|/admin/|$MSG
 quitter sans publier|/admin/|$MSG; const i = document.querySelector('#editCorps input[type=text]'); i.value = i.value + ' x'; signalerSaisie(); document.querySelector('.retour').click()

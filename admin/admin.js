@@ -181,23 +181,79 @@ document.addEventListener('keydown', e => {
   const a = document.getElementById('avatarInit'); if (a) a.focus();
 });
 
-/* ── Mon site : une carte par écran d'édition déclaré ── */
+/* ── Mon site : une carte par écran d'édition déclaré (B3, LELAB-DESIGN §2 et §4) ──
+   ⚠️ L'ORDRE EST CELUI DU SITE TEL QU'ON LE VOIT, lu dans index.html le 28/10 : le message vient en
+      premier (bannière FIXÉE en haut de la page d'accueil — #infoBan, position:fixed;top:0 — ou fenêtre
+      ouverte à l'arrivée — #infoPop), même s'il est écrit en fin de DOM ; les numéros et adresses
+      suivent (menu L12, hero L34, #rdv, #infos, pied de page). Un type inconnu se range après.
+   ⚠️ LA COULEUR DIT L'ÉTAT (§2) : papier = à jour, violet = à voir, contour pointillé = masqué. Le
+      surtitre dit pourquoi. La règle est etatDuMessage, la même que la phrase d'accueil.
+   ⚠️ Rien du site BAPU n'entre ici : les vraies valeurs, en encre LeLab, jamais sur blanc. */
+const ORDRE_DU_SITE = ['message', 'coordonnees'];
+const SVG_FLECHE_HAUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>';
+const dateCourte = iso => { const [a, m, j] = iso.split('-').map(Number); return new Date(a, m - 1, j).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); };
+const dateJJMM = iso => { const [, m, j] = iso.split('-'); return j + '/' + m; };
+
+/* Le message : état, surtitre (le mot qui explique l'état), et son signe (titre du message, format). */
+function carteMessage(info, maintenant){
+  const e = etatDuMessage(info, maintenant);
+  let sur;
+  if (e.etat === 'masque') sur = 'Masqué';
+  else if (e.raison === 'termine') sur = 'Terminé le ' + dateJJMM(info.dateFin) + ' : à retirer ou à remplacer';
+  else if (e.raison === 'programme') sur = 'Programmé le ' + dateCourte(info.dateDebut);
+  else sur = info.dateFin ? 'Jusqu’au ' + dateCourte(info.dateFin) : 'Sans date de fin';
+  const signe = [
+    el('span', { class: 's-titre', text: info.titre || 'Sans titre' }),
+    el('span', { class: 's-format', text: (info.type === 'banniere' ? 'Bannière' : 'Fenêtre') + ' · page d’accueil' })
+  ];
+  return { etat: e.etat === 'inconnu' ? 'a-jour' : e.etat, sur, signe };
+}
+/* Les adresses : téléphone = le standard en grand ; desktop = quatre lignes à filets (CSS). */
+function carteCoordonnees(coord){
+  const tels = (coord && coord.telephones) || {}, sites = (coord && Array.isArray(coord.sites)) ? coord.sites : [];
+  const ligne = (lib, val, tel) => el('span', { class: 's-ligne' + (tel ? ' s-ligne--tel' : '') }, [el('span', { class: 's-lib', text: lib }), el('span', { class: 's-val', text: val })]);
+  const lignes = [];
+  if (tels.standard) lignes.push(ligne('Standard · Marseille et Aix', tels.standard, true));
+  if (tels.portable) lignes.push(ligne('Portable', tels.portable, true));
+  sites.forEach(s => lignes.push(ligne(s.nom || s.cle, (Array.isArray(s.adresse) ? s.adresse : []).join(' '))));
+  const signe = [
+    tels.standard ? el('span', { class: 's-mobile' }, [el('span', { class: 's-gros', text: tels.standard }), el('span', { class: 's-legende', text: 'Standard · Marseille et Aix' })]) : null,
+    el('span', { class: 's-lignes' }, lignes)
+  ];
+  return { etat: 'a-jour', sur: '', signe };
+}
+
 function renderSiteCards(){
   const zone = document.getElementById('siteCards');
   zone.textContent = '';
-  const cartes = toutesLesCartes();
+  const rang = c => { const i = ORDRE_DU_SITE.indexOf(c.type); return i < 0 ? ORDRE_DU_SITE.length : i; };
+  const cartes = toutesLesCartes().sort((a, b) => rang(a) - rang(b));
   if (!cartes.length){
     zone.appendChild(el('p', { class: 'cards-vide', text: 'Configuration indisponible pour le moment. Rechargez la page dans un instant.' }));
     return;
   }
-  cartes.forEach(c => {
+  const maintenant = new Date();
+  cartes.forEach((c, i) => {
+    const num = String(i + 1).padStart(2, '0');
     const enPanne = etatDonnees[c.fichier] === 'erreur';
-    const carte = el('button', { class: 'card grain-papier' + (enPanne ? ' card--panne' : ''), type: 'button', 'data-edit': c.edit }, [
-      el('span', { class: 'card-ico' }, [svgPicto(c.picto)]),
-      el('span', { class: 'card-t', text: c.action }),
-      el('span', { class: 'card-sub', text: enPanne ? 'Lecture impossible pour le moment' : c.sub })
+    const d = donnees[c.fichier];
+    const v = enPanne ? { etat: 'a-voir', sur: 'Lecture impossible pour le moment', signe: [] }
+      : c.type === 'message' ? carteMessage(d || {}, maintenant)
+      : c.type === 'coordonnees' ? carteCoordonnees(d)
+      : { etat: 'a-jour', sur: '', signe: [el('span', { class: 's-format', text: c.sub })] };
+    const titre = c.type === 'message' ? 'Message d’info' : c.type === 'coordonnees' ? 'Adresses & téléphones' : c.label;
+    const grain = v.etat === 'a-voir' ? ' grain-a-voir' : v.etat === 'masque' ? '' : ' grain-papier';
+    const fl = el('span', { class: 'arrow' }); fl.innerHTML = SVG_FLECHE_HAUT;
+    const carte = el('button', { class: 'card card--' + v.etat + grain, type: 'button', 'data-edit': c.edit, 'data-etat': v.etat }, [
+      el('span', { class: 'card-tete' }, [
+        el('span', { class: 'card-tete-txt' }, [
+          el('span', { class: 'card-sur', text: num + (v.sur ? ' · ' + v.sur : '') }),
+          el('span', { class: 'card-t', text: titre })
+        ]),
+        fl
+      ]),
+      el('span', { class: 'card-signe' }, v.signe)
     ]);
-    const fl = el('span', { class: 'arrow' }); fl.innerHTML = SVG_FLECHE; carte.appendChild(fl);
     carte.addEventListener('click', () => openEdit(c));
     zone.appendChild(carte);
   });
