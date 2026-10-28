@@ -43,71 +43,47 @@
 </div>
 
 <div class="app">
-  <!-- ═══ SIDEBAR (desktop) ═══ -->
-  <aside class="sidebar">
-    <div class="logo-wrap"><img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="72" height="40" loading="lazy"><img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="72" height="40" loading="lazy"></div>
-    <nav class="nav-list" aria-label="Navigation">
-      <button class="nav-item" data-screen="dashboard" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>
-        <span class="nav-txt"><span class="nav-name">Accueil</span><span class="nav-sub">Vue d'ensemble</span></span>
-      </button>
-      <button class="nav-item" data-screen="monsite" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
-        <span class="nav-txt"><span class="nav-name">Mon site</span><span class="nav-sub">Mon contenu</span></span>
-      </button>
-    </nav>
-    <div class="user-row">
-      <div class="av" aria-hidden="true"></div>
-      <div class="user-name"></div>
-      <button class="logout" type="button" onclick="doLogout()" title="Déconnexion" aria-label="Déconnexion">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.6 6.8a8 8 0 1 0 10.8 0"/></svg>
-      </button>
-    </div>
-  </aside>
-
-  <!-- ═══ TOPBAR (mobile) ═══ -->
-  <header class="topbar-m">
-    <img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="54" height="30" loading="lazy">
-    <img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="54" height="30" loading="lazy">
-    <div class="topbar-r">
-      <div class="av" aria-hidden="true"></div>
-      <button class="logout" type="button" onclick="doLogout()" title="Déconnexion" aria-label="Déconnexion">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.6 6.8a8 8 0 1 0 10.8 0"/></svg>
-      </button>
+  <!-- ═══ BARRE HAUTE (B2, LELAB-DESIGN §4) : le logo LeLab et l'avatar. Pas de segment : BAPU est LeLab. ═══ -->
+  <header class="barre">
+    <span class="barre-logo">
+      <img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="62" height="34" loading="lazy">
+      <img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="62" height="34" loading="lazy">
+    </span>
+    <!-- L'avatar ouvre un VOLET (prénom, cabinet, « Se déconnecter ») : un toucher ne déconnecte jamais seul.
+         « Mon compte » viendra à son bout. Pas de confirm() : il ne s'affiche pas partout. -->
+    <div class="compte" id="compte">
+      <button type="button" class="avatar-init" id="avatarInit" onclick="basculerVoletCompte()"
+              aria-haspopup="true" aria-expanded="false" aria-controls="voletCompte" aria-label="Mon compte"></button>
+      <div class="volet-compte" id="voletCompte" hidden>
+        <p class="vc-nom" id="voletNom"></p>
+        <p class="vc-cabinet" id="voletCabinet"></p>
+        <button type="button" class="vc-sortie" onclick="fermerVoletCompte();doLogout()">Se déconnecter</button>
+      </div>
     </div>
   </header>
 
   <main class="main">
-    <!-- ═══ ACCUEIL ═══ -->
-    <section class="screen active" id="screen-dashboard" aria-labelledby="hello">
-      <p class="hello-date" id="helloDate"></p>
-      <h1 class="hello" id="hello"><strong>Bonjour<br><span id="helloName"></span>,</strong><br>que voulez-vous faire aujourd'hui&nbsp;?</h1>
-      <div class="tiles">
-        <button class="tile tile--site grain-a-voir" type="button" data-screen="monsite">
-          <svg class="tile-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M7 8h10M7 11h6M9 20h6M12 16v4"/></svg>
-          <span class="tile-t">Modifier<br>mon site</span>
-          <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-        </button>
-        <div class="tile tile--etat grain-papier" id="tileMessage" hidden>
-          <span class="etat-lbl">Message d'info</span>
-          <span class="etat-val" id="etatMessage"></span>
-          <span class="etat-sub" id="etatMessageSub"></span>
+    <!-- ═══ MON SITE = l'accueil (LELAB-DESIGN §5, écran 1) : porte .active dès le HTML. ═══ -->
+    <section class="screen active" id="screen-monsite" aria-labelledby="accueilTitre">
+      <div class="site-cadre">
+        <div class="accueil-col">
+          <!-- La phrase d'accueil dit l'état réel du site (§4). Écrite par renderAccueil(). -->
+          <h1 class="accueil" id="accueilTitre"><span id="accueilSalut">Bonjour.</span><span id="accueilEtat">Votre site est à jour.</span></h1>
+          <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne">En ligne</span></div>
+        </div>
+        <div class="cartes-col">
+          <div class="cards" id="siteCards"></div>
+        </div>
+        <div class="pied-col">
+          <p class="reste">Le reste du site, c’est nous. <a href="mailto:contact@lestudmarseille.fr?subject=BAPU%20%E2%80%94%20une%20demande%20pour%20le%20site">Demander au studio</a></p>
+          <a class="site-link" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
         </div>
       </div>
-      <a class="site-link" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
-    </section>
-
-    <!-- ═══ MON SITE ═══ -->
-    <section class="screen" id="screen-monsite" aria-labelledby="monsiteTitre">
-      <h1 class="screen-h" id="monsiteTitre">Mon site</h1>
-      <p class="screen-p">Modifiez le contenu de votre site. Après publication, comptez moins d'une minute avant de voir les changements en ligne.</p>
-      <div class="cards" id="siteCards"></div>
-      <a class="site-link site-link--c" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
     </section>
 
     <!-- ═══ ÉDITION (un éditeur par type de bloc, construit par admin.js) ═══ -->
     <section class="screen" id="screen-edit" aria-labelledby="editTitre">
-      <button class="retour" type="button" data-screen="monsite">← Mon site</button>
+      <button class="retour" type="button" data-screen="monsite">‹ Mon site</button>
       <h1 class="screen-h" id="editTitre"></h1>
       <p class="screen-p" id="editSub"></p>
       <div class="lieu grain-papier" id="editLieu" hidden></div>
@@ -129,18 +105,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ═══ NAV BAS (mobile) ═══ -->
-  <nav class="nav-bas" aria-label="Navigation">
-    <button class="nb-item" data-screen="dashboard" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
-      <span>Accueil</span>
-    </button>
-    <button class="nb-item" data-screen="monsite" type="button">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></svg>
-      <span>Mon site</span>
-    </button>
-  </nav>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>

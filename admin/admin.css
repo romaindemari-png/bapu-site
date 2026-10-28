@@ -4,11 +4,10 @@
    ⚠️ AUCUNE VALEUR DE COULEUR ICI : seulement des var(--…) de la charte.
    GÉNÉRIQUE : aucune couleur de charte client ici (rien du site BAPU
    n'entre dans l'admin, ni sa couleur ni sa typo).
-   B1 (28/10) : charte posée sur la structure existante. La coquille
-   (barre haute, plus de sidebar ni de nav du bas) vient en B2.
+   B1 (28/10) : charte. B2 : la coquille — barre haute (logo, avatar,
+   volet compte), « Mon site » est l'accueil ; plus de sidebar ni de nav du bas.
    ============================================================ */
 :root{
-  --sidebar-w:252px;
   --r-sm:10px; --r-md:16px; --r-lg:24px; --r-pill:999px;
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px; --sp-8:32px;
   --font-admin:var(--sans);
@@ -48,53 +47,57 @@ body:not(.authed) .app{display:none}
 .btn:disabled{background:transparent;color:var(--texte);border:1.5px solid var(--contour);border-color:color-mix(in srgb,var(--texte) 22%,transparent);cursor:default}
 .btn--block{width:100%}
 
-/* ── Gabarit ── */
-.sidebar{position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);color:var(--texte);display:flex;flex-direction:column;padding:var(--sp-6) var(--sp-3) var(--sp-4);border-right:1px solid var(--contour);z-index:3}
-.logo-wrap{padding:0 var(--sp-2) var(--sp-6)}
-.logo-wrap img{height:40px;width:auto}
-.nav-list{display:flex;flex-direction:column;gap:var(--sp-1)}
-.nav-item{display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-sm);text-align:left;color:var(--texte-2);min-height:44px}
-.nav-item svg{width:18px;height:18px;flex:none}
-.nav-item.active{background:var(--papier);color:var(--encre)}
-.nav-txt{display:flex;flex-direction:column}
-.nav-name{font-size:14px;font-weight:600;line-height:1.2}
-.nav-sub{font-size:12px}
-.user-row{margin-top:auto;display:flex;align-items:center;gap:var(--sp-3);padding:var(--sp-2)}
-.user-name{flex:1;font-size:13px;font-weight:600;line-height:1.25}
-.av{width:34px;height:34px;border-radius:50%;background:var(--a-voir);color:var(--a-voir-texte);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex:none}
-.logout{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--texte)}
-.logout svg{width:18px;height:18px}
+/* ── Gabarit (B2) : une barre haute, puis l'écran. Plus de sidebar, plus de nav du bas. ── */
+.barre{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:calc(var(--sp-3) + env(safe-area-inset-top)) var(--sp-4) var(--sp-3);max-width:1360px;margin:0 auto;position:relative;z-index:5}
+.barre-logo{display:flex;align-items:center}
+.barre-logo img{height:34px;width:auto}
+.compte{position:relative}
+.avatar-init{width:44px;height:44px;border-radius:50%;background:var(--a-voir);color:var(--a-voir-texte);
+  font:600 14px/1 var(--sans);letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
+/* Le volet du compte, ancré sous l'avatar. Papier + encre. */
+.volet-compte{position:absolute;top:calc(100% + 8px);right:0;z-index:60;min-width:230px;padding:var(--sp-4);
+  background:var(--papier);color:var(--encre);border-radius:20px;display:flex;flex-direction:column;gap:var(--sp-2)}
+.volet-compte[hidden]{display:none}
+.vc-nom{font:400 24px/1.1 var(--serif)}
+.vc-cabinet{font-size:14px;color:var(--papier-2)}
+.vc-cabinet:empty{display:none}
+.vc-sortie{margin-top:var(--sp-2);min-height:44px;padding:0 18px;border-radius:var(--r-pill);color:var(--encre);
+  border:1.5px solid var(--papier-2);font:500 14px/1 var(--sans)}
 
-.main{margin-left:var(--sidebar-w);padding:var(--sp-8) var(--sp-6) 96px;display:flex;justify-content:center}
+.main{padding:var(--sp-4) var(--sp-4) calc(48px + env(safe-area-inset-bottom));display:flex;justify-content:center}
 .screen{display:none;width:100%;max-width:576px}
 .screen.active{display:block}
-.topbar-m,.nav-bas{display:none}
+#screen-monsite{max-width:1360px}
 
-/* ── Accueil ── */
-.hello-date{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--texte-2);margin-bottom:var(--sp-5)}
-.hello{font:400 54px/.93 var(--serif);letter-spacing:-.025em;margin-bottom:var(--sp-6)}
-.hello strong{font-weight:400}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-5)}
-.tile{position:relative;min-height:170px;border-radius:var(--r-lg);padding:var(--sp-4);text-align:left;display:flex;flex-direction:column}
-.tile--site{background:var(--a-voir);color:var(--a-voir-texte)}
-.tile-ico{width:42px;height:42px;stroke-width:1.6}
-.tile-t{margin-top:auto;font:400 28px/.95 var(--serif);letter-spacing:-.02em;padding-right:44px}
-.tile .arrow{position:absolute;right:var(--sp-4);bottom:var(--sp-4)}
-.tile--etat{background:var(--papier);color:var(--encre)}
-.etat-lbl{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--papier-2)}
-.etat-val{margin-top:auto;font:400 30px/1 var(--serif);letter-spacing:-.02em;display:flex;align-items:center;gap:var(--sp-2)}
-.etat-val::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--papier-2);flex:none}
-.tile--etat[data-etat="En ligne"] .etat-val::before{background:var(--en-ligne);box-shadow:0 0 0 1px var(--encre)}
-.tile--etat[data-etat="Programmé"] .etat-val::before{background:var(--violet-encre)}
-.etat-sub{font-size:14px;color:var(--papier-2);margin-top:var(--sp-1)}
-.site-link{display:inline-block;font-size:14px;font-weight:600;color:var(--texte-2);text-decoration:none;padding:var(--sp-2) 0;min-height:44px}
-.site-link:hover{color:var(--texte)}
-.site-link--c{display:block;text-align:center;margin-top:var(--sp-4)}
+/* ── Mon site = l'accueil : la phrase, les cartes, le pied (téléphone : l'un sous l'autre) ── */
+.site-cadre{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"accueil" "cartes" "pied";gap:var(--sp-6)}
+.accueil-col{grid-area:accueil;padding-top:var(--sp-4)}
+.cartes-col{grid-area:cartes}
+.pied-col{grid-area:pied;display:flex;flex-direction:column;gap:var(--sp-2)}
+.accueil{font:400 48px/.94 var(--serif);letter-spacing:-.025em;color:var(--texte);text-wrap:balance}
+.accueil span{display:block}
+.accueil em{font-style:italic;color:var(--a-voir)}
+.accueil .insecable{display:inline;white-space:nowrap}
+.etat-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-4)}
+.etat-chip{display:inline-flex;align-items:center;gap:7px;font:500 13px/1 var(--sans);padding:9px 14px;border-radius:var(--r-pill)}
+.etat-chip--en-ligne{background:var(--en-ligne);color:var(--encre)}
+.reste{font-size:14px;color:var(--texte-2)}
+.reste a{color:var(--texte);font-weight:600;text-underline-offset:3px;display:inline-block;min-height:24px}
+.site-link{display:inline-flex;align-items:center;font-size:14px;font-weight:600;color:var(--texte);text-decoration:underline;text-underline-offset:3px;min-height:44px;align-self:flex-start}
+@media (min-width:961px){
+  /* Desktop : « ce qu'on règle » à gauche, « ce qu'on voit » à droite (§5) ; jamais trois colonnes. */
+  .site-cadre{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"accueil cartes" "pied cartes";column-gap:64px;row-gap:var(--sp-6);align-items:start;padding:var(--sp-6) var(--sp-6) 0}
+  .accueil{font-size:88px;line-height:.92;letter-spacing:-.03em}
+  .barre{padding:28px 40px}
+  .main{padding:var(--sp-4) var(--sp-6) 64px}
+}
 
 /* ── Mon site ── */
 .screen-h{font:400 44px/.95 var(--serif);letter-spacing:-.025em;margin-bottom:var(--sp-3)}
 .screen-p{color:var(--texte-2);margin-bottom:var(--sp-8)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:var(--sp-3)}
+/* Les cartes s'empilent (planche BAPU) ; leur contenu est refait en B3. */
+.cards{display:grid;grid-template-columns:1fr;gap:var(--sp-3)}
 .card{position:relative;min-height:160px;background:var(--papier);color:var(--encre);border-radius:var(--r-lg);padding:var(--sp-4);text-align:left;display:flex;flex-direction:column;transition:transform .3s}
 .card:hover{transform:translateY(-4px)}
 .card-ico{width:46px;height:46px;border-radius:var(--r-sm);background:var(--a-voir);color:var(--a-voir-texte);display:flex;align-items:center;justify-content:center;margin-bottom:var(--sp-5)}
@@ -177,26 +180,10 @@ html[data-chromie="jour"] .card-ico{background:var(--encre);color:var(--papier)}
 .dev-badge{display:none}
 body.dev-local .dev-badge{display:block;position:fixed;left:var(--sp-4);bottom:var(--sp-2);font-size:12px;font-weight:600;color:var(--papier);background:var(--encre);padding:2px var(--sp-2);border-radius:var(--r-sm);z-index:60}
 
-/* ── Mobile ── */
+/* ── Téléphone ── */
 @media (max-width:720px){
-  .sidebar{display:none}
-  .topbar-m{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--sp-3) + env(safe-area-inset-top)) var(--sp-4) var(--sp-3)}
-  .topbar-m img{height:30px;width:auto}
-  .topbar-r{display:flex;align-items:center;gap:var(--sp-1)}
-  .main{margin-left:0;padding:var(--sp-5) var(--sp-4) calc(96px + env(safe-area-inset-bottom))}
-  .hello{font-size:48px}
-  .nav-bas{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--fond);border-top:1px solid var(--contour);padding:var(--sp-2) 0 calc(var(--sp-2) + env(safe-area-inset-bottom));z-index:40}
-  .nb-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:600;color:var(--texte-2);min-height:44px;justify-content:center}
-  .nb-item svg{width:22px;height:22px}
-  .nb-item.active{color:var(--texte)}
-  .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
-  body.en-edition .nav-bas{display:none}
-  body.en-edition .main{padding-bottom:calc(var(--sp-6) + env(safe-area-inset-bottom))}
   .pied-publier{padding-bottom:calc(var(--sp-4) + env(safe-area-inset-bottom))}
   .fld-duo{grid-template-columns:1fr}
-}
-@media (max-width:380px){
-  .tiles{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important}

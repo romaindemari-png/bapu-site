@@ -12,8 +12,8 @@ for L in 390 1280; do
     [ $code -eq 0 ] || { ko=$((ko+1)); printf '%s\n' "$out" | grep '❌' | head -20; }
   done <<LISTE
 charte.html|/admin/charte.html|
-accueil|/admin/|
-mon site|/admin/|showScreen('monsite')
+accueil (mon site)|/admin/|
+volet compte|/admin/|basculerVoletCompte()
 édition coordonnées|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))
 édition message|/admin/|$MSG
 quitter sans publier|/admin/|$MSG; const i = document.querySelector('#editCorps input[type=text]'); i.value = i.value + ' x'; signalerSaisie(); document.querySelector('.retour').click()

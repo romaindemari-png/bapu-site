@@ -3,6 +3,7 @@
   "famille": "sante",
   "cabinet": {
     "nom": "BAPU Aix-Marseille",
+    "prenom": "Marie-Christine",
     "slug": "bapu"
   },
   "blocs": {

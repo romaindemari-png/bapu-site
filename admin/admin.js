@@ -67,12 +67,10 @@ async function loadData(){
 }
 
 /* ── Écrans ── */
+/* Deux écrans depuis B2 : « Mon site » (l'accueil) et l'édition. Plus de sidebar ni de nav du bas. */
 function showScreen(nom){
+  fermerVoletCompte();
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 'screen-' + nom));
-  const onglet = nom === 'edit' ? 'monsite' : nom;   // l'édition appartient à « Mon site »
-  document.querySelectorAll('[data-screen]').forEach(b => {
-    if (b.classList.contains('nav-item') || b.classList.contains('nb-item')) b.classList.toggle('active', b.dataset.screen === onglet);
-  });
   document.body.classList.toggle('en-edition', nom === 'edit');
   window.scrollTo(0, 0);
 }
@@ -83,8 +81,8 @@ function dateFr(iso){
   const [a, m, j] = iso.split('-').map(Number);
   return new Date(a, m - 1, j).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' });
 }
-function aujourdhui(){
-  const d = new Date(), m = d.getMonth() + 1, j = d.getDate();
+function aujourdhui(d = new Date()){
+  const m = d.getMonth() + 1, j = d.getDate();
   return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (j < 10 ? '0' : '') + j;
 }
 /* État du message, calculé EXACTEMENT comme le site (main.js) : actif, puis bornes incluses. */
@@ -96,25 +94,92 @@ function etatMessage(info){
   if (info.dateDebut && t < info.dateDebut) return { val: 'Programmé', sub: format + ' à partir du ' + dateFr(info.dateDebut) + '.' };
   return { val: 'En ligne', sub: format + (info.dateFin ? ' jusqu\'au ' + dateFr(info.dateFin) : ' sans date de fin') + '.' };
 }
-function renderAccueil(){
-  const nom = (donnees.config && donnees.config.cabinet && donnees.config.cabinet.nom) || '';
-  document.getElementById('helloName').textContent = nom || 'à vous';
-  const d = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  document.getElementById('helloDate').textContent = d.charAt(0).toUpperCase() + d.slice(1);
-  document.querySelectorAll('.user-name').forEach(n => { n.textContent = nom; });
-  const initiales = nom.replace(/[^A-Za-zÀ-ÿ ]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 2).map(m => m[0].toUpperCase()).join('');
-  document.querySelectorAll('.av').forEach(n => { n.textContent = initiales; });
-
-  const carteMsg = toutesLesCartes().find(c => c.type === 'message');
-  const tuile = document.getElementById('tileMessage');
-  tuile.hidden = !carteMsg;
-  if (carteMsg){
-    const e = etatMessage(donnees[carteMsg.fichier]);
-    document.getElementById('etatMessage').textContent = e.val;
-    document.getElementById('etatMessageSub').textContent = e.sub;
-    tuile.dataset.etat = e.val;
-  }
+/* ── La phrase d'accueil (LELAB-DESIGN §4) : le salut, puis l'état RÉEL du site en une phrase. ──
+   BAPU n'a qu'une source « à voir » : le message d'info. Il est à voir quand il s'arrête dans 7 jours
+   ou moins (en ligne), ou quand il est terminé mais encore actif. Désactivé ou programmé : à jour.
+   ⚠️ etatDuMessage est la SEULE règle : la phrase la lit, la carte du message la lira (B3). */
+const JOUR_MS = 86400000;
+function joursEntre(isoA, isoB){   // dates locales AAAA-MM-JJ, sans heure : écart en jours entiers
+  const d = iso => { const [a, m, j] = iso.split('-').map(Number); return Date.UTC(a, m - 1, j); };
+  return Math.round((d(isoB) - d(isoA)) / JOUR_MS);
 }
+function etatDuMessage(info, maintenant){
+  if (!info) return { etat: 'inconnu' };
+  if (!info.actif) return { etat: 'masque' };
+  const t = aujourdhui(maintenant);
+  if (info.dateFin && t > info.dateFin) return { etat: 'a-voir', raison: 'termine' };
+  if (info.dateDebut && t < info.dateDebut) return { etat: 'a-jour', raison: 'programme' };
+  if (info.dateFin){
+    const reste = joursEntre(t, info.dateFin);
+    if (reste <= 7) return { etat: 'a-voir', raison: 'expire', reste };
+  }
+  return { etat: 'a-jour', raison: 'en-ligne' };
+}
+const JOURS_SEMAINE = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+/* Quand le message s'arrête, dit comme on le dirait : ce soir, demain, samedi, mercredi 4 novembre. */
+function quandFin(iso, reste){
+  if (reste === 0) return 'ce soir';
+  if (reste === 1) return 'demain';
+  const [a, m, j] = iso.split('-').map(Number), d = new Date(a, m - 1, j);
+  return reste < 7 ? JOURS_SEMAINE[d.getDay()] : d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+function prenomDuProfil(){ return (((donnees.config || {}).cabinet || {}).prenom || '').trim(); }
+function salutation(maintenant){
+  const prenom = prenomDuProfil();
+  return (maintenant.getHours() < 18 ? 'Bonjour' : 'Bonsoir') + (prenom ? ' ' + prenom : '') + '.';
+}
+/* Initiales de l'avatar : celles du prénom (Marie-Christine → MC), sinon celles du cabinet. */
+function initialesAvatar(){
+  const source = prenomDuProfil() || (((donnees.config || {}).cabinet || {}).nom || '');
+  return source.replace(/[^A-Za-zÀ-ÿ\s-]/g, ' ').split(/[\s-]+/).filter(Boolean).slice(0, 2).map(m => m[0].toUpperCase()).join('');
+}
+function renderAccueil(){
+  const maintenant = new Date();
+  const cabinet = ((donnees.config || {}).cabinet || {});
+  /* Le prénom reste d'un seul tenant : « Marie-Christine » ne se coupe pas au trait d'union. */
+  const salut = document.getElementById('accueilSalut'), prenom = prenomDuProfil();
+  salut.textContent = '';
+  if (prenom) salut.append(salutation(maintenant).slice(0, -(prenom.length + 1)), el('span', { class: 'insecable', text: prenom }), '.');
+  else salut.textContent = salutation(maintenant);
+  const etat = document.getElementById('accueilEtat');
+  etat.textContent = '';
+  const carteMsg = toutesLesCartes().find(c => c.type === 'message');
+  const info = carteMsg ? donnees[carteMsg.fichier] : null;
+  const e = carteMsg ? etatDuMessage(info, maintenant) : { etat: 'inconnu' };
+  if (e.raison === 'expire'){
+    etat.append('Votre message s’arrête ', el('em', { text: quandFin(info.dateFin, e.reste) }), '.');
+  } else {
+    etat.textContent = e.raison === 'termine' ? 'Votre message est terminé.' : 'Votre site est à jour.';
+  }
+  document.getElementById('avatarInit').textContent = initialesAvatar();
+  document.getElementById('voletNom').textContent = prenomDuProfil() || cabinet.nom || '';
+  document.getElementById('voletCabinet').textContent = prenomDuProfil() ? (cabinet.nom || '') : '';
+}
+
+/* ═══ LE VOLET DU COMPTE — ouvert par l'avatar, fermé dehors, par Échap ou par un second toucher ═══ */
+function voletCompteOuvert(){ const v = document.getElementById('voletCompte'); return !!(v && !v.hidden); }
+function ouvrirVoletCompte(){
+  const v = document.getElementById('voletCompte'), a = document.getElementById('avatarInit');
+  if (!v) return;
+  v.hidden = false; if (a) a.setAttribute('aria-expanded', 'true');
+}
+function fermerVoletCompte(){
+  const v = document.getElementById('voletCompte'), a = document.getElementById('avatarInit');
+  if (!v) return;
+  v.hidden = true; if (a) a.setAttribute('aria-expanded', 'false');
+}
+function basculerVoletCompte(){ voletCompteOuvert() ? fermerVoletCompte() : ouvrirVoletCompte(); }
+/* pointerdown, pas click : le toucher dehors ferme AVANT qu'un autre geste parte. Le second toucher sur
+   l'avatar est dans .compte : c'est basculerVoletCompte qui le referme. */
+document.addEventListener('pointerdown', e => {
+  const c = document.getElementById('compte');
+  if (voletCompteOuvert() && c && !c.contains(e.target)) fermerVoletCompte();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !voletCompteOuvert()) return;
+  fermerVoletCompte();
+  const a = document.getElementById('avatarInit'); if (a) a.focus();
+});
 
 /* ── Mon site : une carte par écran d'édition déclaré ── */
 function renderSiteCards(){
@@ -488,7 +553,7 @@ async function boot(user){
   await loadData();
   renderAccueil();
   renderSiteCards();
-  showScreen('dashboard');
+  showScreen('monsite');
 }
 
 let toastTimer = null;
@@ -503,7 +568,7 @@ function showToast(msg){
 function customLogout(){
   clearSession();
   edition = null;
-  showScreen('dashboard');
+  showScreen('monsite');
   document.body.classList.remove('authed');
   showToast('Déconnecté');
 }
