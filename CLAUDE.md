@@ -32,6 +32,10 @@ netlify/functions/save-data.js      Sauvegarde admin → GitHub via Git Gateway 
                                     n'est écrit. N'EST PLUS IDENTIQUE AU MASTER : ne pas l'écraser par une copie
                                     du master sans y reporter cette garde. Sonde : node scripts/test-save-data.js
 scripts/test-allerretour.js         Sonde de l'admin, sur les copies GELÉES de scripts/fixtures/ (jamais _data)
+admin/charte.css                    Charte de l'app LeLab (tokens nuit/jour, Instrument, grain, flou violet seul) —
+                                    LELAB-DESIGN.md. admin.css ne lit que ses var(--…). Contrôle : admin/charte.html
+scripts/mesure-charte-tout.sh       Contraste WCAG de chaque écran de l'admin, 390 et 1280 px, nuit et jour
+scripts/captures.js                 Captures de l'admin (390/1280, nuit/jour) sur les copies gelées
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)
