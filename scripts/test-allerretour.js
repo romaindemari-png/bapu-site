@@ -8,6 +8,12 @@
    L'appel à save-data est INTERCEPTÉ : rien n'est écrit, nulle part.
    Le corps qui serait envoyé est comparé, à l'octet, à ce que save-data
    écrirait (JSON.stringify(data, null, 2) + '\n').
+
+   ⚠️ DONNÉES GELÉES. Les /_data/*.json servis à la page sont les COPIES de
+   scripts/fixtures/ (copiées de _data le 28/10), jamais les fichiers vivants :
+   la cliente publie depuis l'admin, et une sonde qui lit _data change de
+   résultat sans que le code ait bougé (constaté le 28/10 : son titre du 20/10
+   valait la valeur de test « Fermeture exceptionnelle », l'id ne changeait plus).
    ============================================================ */
 const fs = require('fs');
 const path = require('path');
@@ -18,7 +24,18 @@ catch (e) { puppeteer = require(path.join(__dirname, '../../lestud-template-food
 const BASE = (process.argv[2] || 'http://localhost:8765').replace(/\/$/, '');
 const RACINE = path.join(__dirname, '..');
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const fichier = f => fs.readFileSync(path.join(RACINE, '_data', f + '.json'), 'utf8');
+const FIXTURES = path.join(__dirname, 'fixtures');
+const fichier = f => fs.readFileSync(path.join(FIXTURES, f + '.json'), 'utf8');
+/* /_data/<f>.json → la copie gelée ; un fichier sans copie → 404, comme un fichier absent. */
+function servirFixtures(page){
+  page.on('request', r => {
+    const m = new URL(r.url()).pathname.match(/^\/_data\/([a-z0-9-]+)\.json$/);
+    if (!m) return;
+    const f = path.join(FIXTURES, m[1] + '.json');
+    if (fs.existsSync(f)) return r.respond({ status: 200, contentType: 'application/json', body: fs.readFileSync(f, 'utf8') });
+    return r.respond({ status: 404, body: '' });
+  });
+}
 const commeSaveData = data => JSON.stringify(data, null, 2) + '\n';
 
 let echecs = 0, total = 0;
@@ -32,11 +49,13 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     p = await b.newPage();
     envois = []; reponse = { status: 200, body: '{"success":true}' };
     await p.setRequestInterception(true);
+    servirFixtures(p);
     p.on('request', r => {
       if (r.url().includes('/.netlify/functions/save-data')){
         envois.push(JSON.parse(r.postData()));
         return r.respond({ status: reponse.status, contentType: 'application/json', body: reponse.body });
       }
+      if (new URL(r.url()).pathname.startsWith('/_data/')) return;   // déjà servi par servirFixtures
       r.continue();
     });
     p.on('pageerror', e => ok('aucune erreur JS', false, e.message));
@@ -59,6 +78,9 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   /* 0. Configuration BAPU telle que publiée : textes d'accueil NON éditables. */
   {
     const q = await b.newPage();
+    await q.setRequestInterception(true);
+    servirFixtures(q);
+    q.on('request', r => { if (!new URL(r.url()).pathname.startsWith('/_data/')) r.continue(); });
     await q.goto(BASE + '/admin/', { waitUntil: 'networkidle0' });
     const r = await q.evaluate(() => ({ cartes: toutesLesCartes().map(c => c.edit), dom: [...document.querySelectorAll('#siteCards .card')].map(c => c.dataset.edit), textesLu: 'textes' in etatDonnees }));
     ok('config BAPU : aucune carte « accueil » (ni dans la config lue, ni à l’écran)', !r.cartes.includes('accueil') && !r.dom.includes('accueil') && r.dom.length === 2, JSON.stringify(r));
@@ -127,10 +149,18 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   env = await publierEtAttendre();
   ok('textes : paragraphe vide → refusé, rien envoyé', env === null);
 
-  await ouvrir(); await ouvrirEdition('coordonnees');
-  await saisirN('input[type=tel]', 1, '06 12 34 56 78');
-  env = await publierEtAttendre();
-  ok('coordonnees : téléphone d’Aix modifié, Marseille intact', env && env.data.sites[1].telephone === '06 12 34 56 78' && env.data.sites[0].telephone === '04 91 50 01 13');
+  /* Numéros COMMUNS aux deux sites (telephones.standard / .portable, depuis le 23/10) : les sites
+     n'ont plus de `telephone`, les deux seuls champs tél. sont standard (0) puis portable (1). */
+  const coord = JSON.parse(fichier('coordonnees'));
+  for (const [type, i, autre] of [['portable', 1, 'standard'], ['standard', 0, 'portable']]){
+    await ouvrir(); await ouvrirEdition('coordonnees');
+    await saisirN('input[type=tel]', i, '06 12 34 56 78');
+    env = await publierEtAttendre();
+    ok(`coordonnees : numéro ${type} modifié, ${autre} et adresses intacts, aucun téléphone ajouté aux sites`,
+      coord.telephones[type] !== '06 12 34 56 78' && env && env.data.telephones[type] === '06 12 34 56 78'
+      && env.data.telephones[autre] === coord.telephones[autre]
+      && JSON.stringify(env.data.sites) === JSON.stringify(coord.sites), JSON.stringify(env && env.data));
+  }
   await saisirN('input[type=tel]', 0, '12 34');
   env = await publierEtAttendre();
   ok('coordonnees : téléphone invalide → refusé, rien envoyé', env === null);
@@ -145,11 +175,14 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   await p.evaluate(() => { const c = document.querySelectorAll('#editCorps input[type=checkbox]'); c[c.length - 1].click(); });   // urgences
   env = await publierEtAttendre();
   ok('message : basculer les urgences ne change PAS l’id', env && env.data.id === info.id && env.data.urgences === !info.urgences);
-  for (const [nom, sel, i, val] of [['titre', 'input[type=text]', 1, 'Fermeture exceptionnelle'], ['texte', 'textarea', 0, 'Fermé **lundi**.'], ['date de fin', 'input[type=date]', 1, '2026-12-31']]){
+  /* Chaque valeur DIFFÈRE de la copie gelée (contrôlé ci-dessous) : sinon rien ne change et l'id
+     reste, à raison — c'est ce qui faisait échouer la sonde quand elle lisait _data. */
+  for (const [nom, cle, sel, i, val] of [['titre', 'titre', 'input[type=text]', 1, 'Titre de sonde'], ['texte', 'texte', 'textarea', 0, 'Fermé **lundi**.'], ['date de fin', 'dateFin', 'input[type=date]', 1, '2026-12-31']]){
     await ouvrir(); await ouvrirEdition('message');
     await saisirN(sel, i, val);
     env = await publierEtAttendre();
-    ok(`message : changer le ${nom} régénère l’id`, env && env.data.id !== info.id && /^msg-/.test(env.data.id), env && env.data.id);
+    ok(`message : changer le ${nom} régénère l’id`, info[cle] !== val && env && env.data.id !== info.id && /^msg-/.test(env.data.id),
+      'copie : ' + info[cle] + ' · id envoyé : ' + (env && env.data.id));
   }
   await ouvrir(); await ouvrirEdition('message');
   await saisirN('textarea', 0, 'Ligne 1\nFermé **lundi** <img src=x>');

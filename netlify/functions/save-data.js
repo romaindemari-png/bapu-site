@@ -7,6 +7,23 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  /* ⚠️ PROPRE À BAPU (28/10/2026) : CE FICHIER N'EST PLUS IDENTIQUE AU MASTER lestud-template-food.
+     Seul ce bloc diffère ; le reste est la copie du master.
+
+     ⚠️ UN APERÇU N'ÉCRIT JAMAIS. Git Gateway écrit sur la branche par défaut (main) quel que soit
+     l'hôte qui appelle : une publication depuis un Deploy Preview modifierait les données EN LIGNE
+     de la cliente. On refuse donc toute écriture hors de l'adresse de prod.
+     Critère = l'hôte de la requête. Doc Netlify (site-deploys/overview) : Deploy Preview
+     « deploy-preview-42--site.netlify.app », branch deploy « staging--site.netlify.app », permalink
+     « <id>--site.netlify.app » — tous portent « -- » ; la prod (bapuaixmarseille.fr,
+     bapu-site.netlify.app) jamais. Les sous-domaines de branche sans « -- » exigent Netlify DNS
+     (DNS de BAPU chez OVH) et un déploiement de branche (seul main est autorisé).
+     Hôte absent → refus aussi. CONTEXT n'est pas utilisé : rien ne prouve qu'il soit lisible ici. */
+  const hote = String((event.headers && (event.headers.host || event.headers.Host)) || '').toLowerCase();
+  if (!hote || hote.includes('--')) {
+    return { statusCode: 403, body: JSON.stringify({ error: 'Aperçu : publication désactivée (rien n’a été écrit).', hote }) };
+  }
+
   // Récupérer le token Netlify Identity depuis le header Authorization
   const authHeader = event.headers['authorization'] || event.headers['Authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) {

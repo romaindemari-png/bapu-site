@@ -27,7 +27,11 @@ css/styles.css                      TOUT le CSS (un seul fichier)
 js/main.js                          TOUT le JS applicatif (hero, parallax, reveal, Lenis, popup INFO, carte, puzzle)
 js/lelab-sante-loader.js            Loader LeLab santé (générique) : _data/textes + coordonnees → marqueurs cms-*
 _data/                              Contenus édités par le client via l'admin (textes, coordonnees, info)
-netlify/functions/save-data.js      Sauvegarde admin → GitHub via Git Gateway — copie À L'OCTET du master lestud-template-food
+netlify/functions/save-data.js      Sauvegarde admin → GitHub via Git Gateway — copie du master lestud-template-food
+                                    SAUF la garde d'aperçu (28/10/2026) : hôte à « -- » ou absent → 403, rien
+                                    n'est écrit. N'EST PLUS IDENTIQUE AU MASTER : ne pas l'écraser par une copie
+                                    du master sans y reporter cette garde. Sonde : node scripts/test-save-data.js
+scripts/test-allerretour.js         Sonde de l'admin, sur les copies GELÉES de scripts/fixtures/ (jamais _data)
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)
