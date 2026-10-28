@@ -11,7 +11,10 @@
       plus de « Petit intitulé », de « Partir d'un modèle », ni de syntaxe technique.
    2. GESTES → JSON : le JSON envoyé est scripts/fixtures/message-attendu.json, ÉCRIT À LA MAIN (l'id,
       tiré au hasard, est vérifié à part : nouveau, de la forme msg-…).
-   3. L'ID : régénéré si le titre ou le texte change ; STABLE si seuls les dates, le format ou l'affichage changent.
+   3. L'ID : régénéré si le titre, le texte OU LES DATES changent ; STABLE si seuls le format, l'affichage ou les
+      numéros d'urgence changent (décidé le 28/10).
+   3bis. URGENCES : « Afficher les numéros d'urgence » est dans la feuille quand le message est une fenêtre (la
+      bannière n'en a pas) ; il part de la valeur d'info.json et l'écrit.
    4. À L'OCTET : publier sans rien changer — même après être entré dans le texte — réécrit le fichier tel quel.
    5. SEULS <strong> ET <br> : un collage arrive en texte brut ; toute autre balise du champ est retirée.
    6. À CORRIGER : affiché sans titre → « Il manque le titre » sous sa ligne, bouton « 1 point à corriger » ;
@@ -120,7 +123,8 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
 
   /* 3. L'ID */
   const CAS_ID = [
-    ['dates seules', 'stable', async p => { await date(p, 1, '2026-11-15'); }],
+    ['dates seules', 'nouvel', async p => { await date(p, 1, '2026-11-15'); }],
+    ['numéros d’urgence seuls', 'stable', async p => { await p.click('#editCorps input[name="msg-type"][value="popup"] + span'); await p.click('#editCorps .f-urgences .switch'); }],
     ['format seul', 'stable', async p => { await p.click('#editCorps input[name="msg-type"][value="popup"] + span'); }],
     ['affichage seul', 'stable', async p => { await p.click('#editCorps .switch'); }],
     ['titre', 'nouvel', async p => { await retaper(p, TITRE, 'Autre titre'); }],
@@ -132,6 +136,22 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     const env = await envoyer(p, envois);
     const id = env && env.data.id;
     ok(`id : ${nom} → ${attendu === 'stable' ? 'id inchangé' : 'nouvel id'}`, env && (attendu === 'stable' ? id === ORIG.id : (id !== ORIG.id && /^msg-/.test(id))), JSON.stringify({ id, envoye: !!env }));
+    await p.close();
+  }
+
+  /* 3bis. URGENCES */
+  {
+    const { p, envois } = await ouvrir();
+    const vu = () => p.evaluate(() => { const l = document.querySelector('#editCorps .f-urgences'); const i = l && l.querySelector('input');
+      return { visible: !!l && l.getClientRects().length > 0, coche: i ? i.checked : null, texte: l ? l.innerText.trim() : null }; });
+    const enBanniere = await vu();
+    await p.click('#editCorps input[name="msg-type"][value="popup"] + span');
+    const enFenetre = await vu();
+    ok('urgences : absent en bannière, présent en fenêtre, « Afficher les numéros d’urgence »', !enBanniere.visible && enFenetre.visible && /^Afficher les numéros d’urgence/.test(enFenetre.texte || ''), JSON.stringify([enBanniere, enFenetre]));
+    ok('urgences : part de la valeur d’info.json', enFenetre.coche === ORIG.urgences, JSON.stringify(enFenetre));
+    await p.click('#editCorps .f-urgences .switch');
+    const env = await envoyer(p, envois);
+    ok('urgences : la bascule est écrite, l’id ne change pas', env && env.data.urgences === !ORIG.urgences && env.data.id === ORIG.id, JSON.stringify(env && { urgences: env.data.urgences, id: env.data.id }));
     await p.close();
   }
 

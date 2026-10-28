@@ -170,7 +170,7 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   env = await publierEtAttendre();
   ok('coordonnees : ligne d’adresse vidée → retirée du tableau', env && JSON.stringify(env.data.sites[0].adresse) === '["93 Bd Camille Flammarion,"]', JSON.stringify(env && env.data.sites[0]));
 
-  /* 4. Message : l'id. B6 (28/10) : il se régénère quand le TITRE ou le TEXTE change, et seulement alors.
+  /* 4. Message : l'id. B6 (28/10) : il se régénère quand le TITRE, le TEXTE ou les DATES changent, et seulement alors.
         La feuille ne règle plus urgences ni label : ils sont restitués tels quels. */
   const info = JSON.parse(fichier('info'));
   const texteMsg = (html) => p.evaluate(h => { const t = document.querySelector('#editCorps .f-msg-texte'); t.innerHTML = h; t.dispatchEvent(new Event('input', { bubbles: true })); }, html);
@@ -182,7 +182,7 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   for (const [nom, cle, geste, val, attendu] of [
     ['titre', 'titre', v => saisirN('input.f-msg-titre', 0, v), 'Titre de sonde', 'nouvel'],
     ['texte', 'texte', v => texteMsg(v), 'Fermé <b>lundi</b>.', 'nouvel'],
-    ['date de fin', 'dateFin', v => saisirN('input[type=date]', 1, v), '2026-12-31', 'stable']]){
+    ['date de fin', 'dateFin', v => saisirN('input[type=date]', 1, v), '2026-12-31', 'nouvel']]){
     await ouvrir(); await ouvrirEdition('message');
     await geste(val);
     env = await publierEtAttendre();

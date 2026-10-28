@@ -75,10 +75,12 @@ body:not(.authed) .app{display:none}
 .accueil-col{grid-area:accueil;padding-top:var(--sp-4)}
 .cartes-col{grid-area:cartes}
 .pied-col{grid-area:pied;display:flex;flex-direction:column;gap:var(--sp-2)}
-.accueil{font:400 48px/.94 var(--serif);letter-spacing:-.025em;color:var(--texte);text-wrap:balance}
+/* Le salut en surtitre : italique, ~ la moitié du titre ; le titre (l'état) en dessous (planche BAPU, 28/10). */
+.accueil-salut{font:italic 400 24px/1.1 var(--serif);color:var(--texte);margin-bottom:6px}
+.accueil{font:400 52px/.95 var(--serif);letter-spacing:-.025em;color:var(--texte);text-wrap:balance}
 .accueil span{display:block}
 .accueil em{font-style:italic;color:var(--a-voir)}
-.accueil .insecable{display:inline;white-space:nowrap}
+.accueil-salut .insecable{white-space:nowrap}
 .etat-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-4)}
 .etat-chip{display:inline-flex;align-items:center;gap:7px;font:500 13px/1 var(--sans);padding:9px 14px;border-radius:var(--r-pill)}
 .etat-chip--en-ligne{background:var(--en-ligne);color:var(--encre)}
@@ -89,7 +91,8 @@ body:not(.authed) .app{display:none}
 @media (min-width:961px){
   /* Desktop : « ce qu'on règle » à gauche, « ce qu'on voit » à droite (§5) ; jamais trois colonnes. */
   .site-cadre{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);grid-template-areas:"accueil cartes" "pied cartes";column-gap:64px;row-gap:var(--sp-6);align-items:start;padding:var(--sp-6) var(--sp-6) 0}
-  .accueil{font-size:88px;line-height:.92;letter-spacing:-.03em}
+  .accueil-salut{font-size:36px;margin-bottom:10px}
+  .accueil{font-size:92px;line-height:.92;letter-spacing:-.03em}
   .barre{padding:28px 40px}
   .main{padding:var(--sp-4) var(--sp-6) 64px}
 }
@@ -174,6 +177,8 @@ body:not(.authed) .app{display:none}
 @media (min-width:961px){ .feuille{padding:var(--sp-6) var(--sp-6) var(--sp-3)} .f-tel{font-size:24px} }
 /* La feuille du message (B6) : réglages en tête, puis ce qu'il dit, puis quand. */
 .f-ligne--seule,.f-ligne--titre,.f-ligne--texte{grid-template-columns:1fr}
+.f-ligne[hidden]{display:none}
+.f-urgences .f-note{margin:0 0 4px}
 .f-groupe:first-child .f-lignes > .f-ligne:first-child{border-top-color:transparent}   /* pas de filet au-dessus de rien */
 .f-ligne--seule{padding-top:10px;padding-bottom:10px}
 .f-msg-titre{font:400 24px/1.15 var(--serif);letter-spacing:-.01em}

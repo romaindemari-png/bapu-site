@@ -117,7 +117,7 @@ function quandFin(iso, reste){
 function prenomDuProfil(){ return (((donnees.config || {}).cabinet || {}).prenom || '').trim(); }
 function salutation(maintenant){
   const prenom = prenomDuProfil();
-  return (maintenant.getHours() < 18 ? 'Bonjour' : 'Bonsoir') + (prenom ? ' ' + prenom : '') + '.';
+  return (maintenant.getHours() < 18 ? 'Bonjour' : 'Bonsoir') + (prenom ? ' ' + prenom : '') + ',';
 }
 /* Initiales de l'avatar : celles du prénom (Marie-Christine → MC), sinon celles du cabinet. */
 function initialesAvatar(){
@@ -130,7 +130,7 @@ function renderAccueil(){
   /* Le prénom reste d'un seul tenant : « Marie-Christine » ne se coupe pas au trait d'union. */
   const salut = document.getElementById('accueilSalut'), prenom = prenomDuProfil();
   salut.textContent = '';
-  if (prenom) salut.append(salutation(maintenant).slice(0, -(prenom.length + 1)), el('span', { class: 'insecable', text: prenom }), '.');
+  if (prenom) salut.append(salutation(maintenant).slice(0, -(prenom.length + 1)), el('span', { class: 'insecable', text: prenom }), ',');
   else salut.textContent = salutation(maintenant);
   const etat = document.getElementById('accueilEtat');
   etat.textContent = '';
@@ -269,14 +269,6 @@ function renderSiteCards(){
 
 let edition = null;   // { carte, origine, lire, sale }
 
-/* Texte riche minimal : stockage HTML (<strong>, <br>) ↔ saisie (**gras**, retour à la ligne).
-   main.js n'interprète que ces deux balises : tout le reste s'affiche comme du texte. */
-function versSaisie(html){
-  return String(html || '').replace(/<br\s*\/?>/gi, '\n').replace(/<strong>([\s\S]*?)<\/strong>/gi, '**$1**');
-}
-function versHTML(saisie){
-  return String(saisie || '').replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>').replace(/\r?\n/g, '<br>');
-}
 /* Même règle que le loader du site : 0X XX XX XX XX, ou +indicatif. */
 function telValide(num){
   const c = String(num).replace(/\D/g, '');
@@ -432,10 +424,11 @@ const EDITEURS = {
      s'écrit comme il se lira : le gras est du gras (bouton « Gras » ou ⌘B), un retour à la ligne est un retour.
      ⚠️ SEULS <strong> ET <br> SONT STOCKÉS (main.js n'interprète qu'eux) ; un texte non touché se réécrit
         à l'octet (garde sur le HTML rendu à l'ouverture). Un collage arrive en texte brut.
-     ⚠️ L'ID SE RÉGÉNÈRE QUAND LE TITRE OU LE TEXTE CHANGE, ET SEULEMENT ALORS (décidé le 28/10). Le site
-        mémorise la fermeture PAR ID : un nouveau titre ou texte se montre à nouveau à tous, y compris à
-        ceux qui avaient fermé l'ancien. Dates, format, affichage : l'id ne bouge pas.
-     ⚠️ label, urgences, memoriser ne sont plus réglés ici : ils sont restitués tels quels. */
+     ⚠️ L'ID SE RÉGÉNÈRE QUAND LE TITRE, LE TEXTE OU LES DATES CHANGENT, ET SEULEMENT ALORS (décidé le 28/10).
+        Le site mémorise la fermeture PAR ID : un message nouveau (ou reprogrammé) se montre à nouveau à tous,
+        y compris à ceux qui avaient fermé l'ancien. Format, affichage, numéros d'urgence : l'id ne bouge pas.
+     ⚠️ « Afficher les numéros d'urgence » : seulement pour une fenêtre (la bannière n'en a pas).
+     ⚠️ label et memoriser ne sont plus réglés ici : ils sont restitués tels quels. Les modèles sont retirés. */
   message(carte, donnee){
     const o = donnee || {};
     const ligne = (classe, enfants) => el('li', { class: 'f-ligne ' + classe }, enfants);
@@ -445,6 +438,8 @@ const EDITEURS = {
     (o.type === 'popup' ? typePop : typeBan).checked = true;
     const format = el('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Format' }, [
       el('label', {}, [typeBan, el('span', { text: 'Bannière en haut' })]), el('label', {}, [typePop, el('span', { text: 'Fenêtre à l’arrivée' })])]);
+    const urg = interrupteur('Afficher les numéros d’urgence', o.urgences);
+    const ligneUrg = el('li', { class: 'f-ligne f-ligne--seule f-urgences' }, [urg.noeud, el('span', { class: 'f-note', text: 'Dans la fenêtre. Les numéros eux-mêmes ne se modifient pas ici.' })]);
     const titre = champ('input', { class: 'f-champ f-msg-titre', type: 'text', autocomplete: 'off', placeholder: 'Titre du message', 'aria-label': 'Titre du message' }, o.titre);
     /* Le texte : rendu EXACTEMENT comme main.js le lira (fillTexte : <strong>, </strong>, <br>, le reste en texte). */
     const texte = el('div', { class: 'f-champ f-msg-texte', contenteditable: 'true', role: 'textbox', 'aria-multiline': 'true', 'aria-label': 'Texte du message', 'data-vide': 'Le texte du message' });
@@ -486,7 +481,7 @@ const EDITEURS = {
     const ligneDu = ligne('f-ligne--date', [el('span', { class: 'f-lib', text: 'Du' }), debut]);
     const ligneAu = ligne('f-ligne--date', [el('span', { class: 'f-lib', text: 'Au (inclus)' }), fin, el('span', { class: 'f-manque', text: 'La fin est avant le début' })]);
     const feuille = el('div', { class: 'feuille grain-papier' }, [
-      el('section', { class: 'f-groupe' }, [el('ul', { class: 'f-lignes' }, [ligne('f-ligne--seule', [actif.noeud]), ligne('f-ligne--seule', [format])])]),
+      el('section', { class: 'f-groupe' }, [el('ul', { class: 'f-lignes' }, [ligne('f-ligne--seule', [actif.noeud]), ligne('f-ligne--seule', [format]), ligneUrg])]),
       el('section', { class: 'f-groupe' }, [el('h2', { class: 'f-titre', text: 'Ce qu’il dit' }), el('ul', { class: 'f-lignes' }, [ligneTitre, ligneTexte])]),
       el('section', { class: 'f-groupe' }, [el('h2', { class: 'f-titre', text: 'Quand' }),
         el('p', { class: 'f-note', text: 'Laissez vide pour commencer tout de suite, ou pour ne jamais s’arrêter. Le message s’éteint seul après la date de fin.' }),
@@ -496,19 +491,23 @@ const EDITEURS = {
     const nouvelId = 'msg-' + Date.now().toString(36);   // fixé à l'ouverture : stable tant qu'on reste dans l'écran
     function lireBrut(){
       const t = garde(titre, o.titre), tx = texteStocke();
-      const contenuChange = t !== o.titre || tx !== o.texte;
+      const d = debut.value, f = fin.value;
+      const contenuChange = t !== o.titre || tx !== o.texte || d !== (o.dateDebut || '') || f !== (o.dateFin || '');
       return { ...o,
         actif: actif.box.checked,
         type: typePop.checked ? 'popup' : 'banniere',
         id: (contenuChange || !o.id) ? nouvelId : o.id,
-        dateDebut: debut.value, dateFin: fin.value,
-        titre: t, texte: tx };
+        dateDebut: d, dateFin: f,
+        titre: t, texte: tx,
+        /* Écrit seulement s'il change : un fichier sans la clé la garde absente (aller-retour à l'octet). */
+        ...(urg.box.checked !== !!o.urgences ? { urgences: urg.box.checked } : {}) };
     }
     const manques = r => [r.actif && !String(r.titre || '').trim() ? ligneTitre : null, r.dateDebut && r.dateFin && r.dateFin < r.dateDebut ? ligneAu : null].filter(Boolean);
     function majFeuille(){
       const r = lireBrut();
       const m = manques(r);
       [ligneTitre, ligneAu].forEach(l => l.classList.toggle('f-ligne--manque', m.includes(l)));
+      ligneUrg.hidden = r.type !== 'popup';   // la bannière n'a pas de numéros d'urgence
       const e = etatMessage(r);
       legende.textContent = 'Ce que vos visiteurs liront, sur la page d’accueil : ' + (r.type === 'banniere' ? 'une bannière en haut de la page.' : 'une fenêtre à l’arrivée.')
         + ' Avec ces réglages : ' + e.val.toLowerCase() + ' — ' + e.sub;
