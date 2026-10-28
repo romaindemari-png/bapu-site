@@ -135,6 +135,20 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     await ctx.close();
   }
 
+  /* 4. TAPER PUIS TOUCHER « PUBLIER » : le toucher part du premier coup. La sortie du champ (change)
+        redessinait le bouton entre l'appui et le relâchement, et le clic était perdu (corrigé le 28/10). */
+  {
+    const { p, j, ctx } = await ouvrir();
+    await ouvrirAdresses(p);
+    const champ = (await p.$$('#editCorps input[type=tel]'))[1];
+    await champ.click({ clickCount: 3 });
+    await p.keyboard.type('06 12 34 56 78');
+    await p.click('#btnPublier');
+    await pause(SAVE_MS + 200);
+    ok('4 · taper un numéro puis toucher « Publier » : l’envoi part du premier toucher', !!(j.envoi && j.envoi.data && j.envoi.data.telephones.portable === '06 12 34 56 78'), JSON.stringify(j.envoi && j.envoi.data && j.envoi.data.telephones));
+    await ctx.close();
+  }
+
   /* A. Deux relectures périmées, puis la bonne */
   for (const reduit of [false, true]){
     const cas = reduit ? 'D' : 'A';

@@ -617,8 +617,18 @@ function etatPublier(ids, classe, libelle, ligne, actif){
     btn.classList.remove('pub--repos', 'pub--a-voir', 'pub--envoi', 'pub--envoye', 'pub--confirme', 'remplit');
     btn.classList.add(classe); btn.disabled = !actif;
     delete btn.dataset.pub; delete btn.dataset.confirme; delete btn.dataset.remplissage;
-    btn.textContent = '';
-    btn.append(el('span', { class: 'pub-txt', text: libelle }), el('span', { class: 'pub-anneau', 'aria-hidden': 'true' }));
+    /* ⚠️ ON NE REMPLACE JAMAIS LES NŒUDS DU BOUTON : on réécrit leur texte. Remplacés, ils disparaissaient
+       entre l'appui et le relâchement quand la sortie du champ (« change ») redessinait le bouton — et le
+       navigateur annulait le clic : on tapait un numéro, on touchait « Publier », rien ne partait (28/10). */
+    let txt = btn.querySelector('.pub-txt');
+    if (!txt){
+      btn.textContent = '';
+      txt = el('span', { class: 'pub-txt' });
+      btn.append(txt, el('span', { class: 'pub-anneau', 'aria-hidden': 'true' }));
+    }
+    if (txt.textContent !== libelle) txt.textContent = libelle;
+    /* L'anneau et le saut rejouent leur animation à chaque « ✓ C'est en ligne » : on relance le nœud. */
+    if (classe === 'pub--confirme'){ const a = btn.querySelector('.pub-anneau'); a.replaceWith(a.cloneNode()); txt.style.animation = 'none'; void txt.offsetWidth; txt.style.animation = ''; }
     btn.dataset.libelle = libelle;   // la copie encre du remplissage (::after)
   }
   if (l && ligne !== null){
