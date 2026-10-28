@@ -427,79 +427,101 @@ const EDITEURS = {
     };
   },
 
-  /* ── Message d'info (popup / bannière) : _data/info.json ──
-     ⚠️ L'ID SE RÉGÉNÈRE dès que titre, texte ou dates changent. Le site mémorise la
-        fermeture PAR ID : sans nouvel id, un visiteur qui a fermé l'ancien message
-        ne verrait JAMAIS le nouveau (critique pour une fermeture exceptionnelle).
-        Le client ne voit jamais ce champ. */
+  /* ── Message d'info : LA FEUILLE (B6, LELAB-DESIGN §4) — _data/info.json ──
+     On règle sur place : afficher ou non, bannière ou fenêtre, les dates, le titre, le texte. Le texte
+     s'écrit comme il se lira : le gras est du gras (bouton « Gras » ou ⌘B), un retour à la ligne est un retour.
+     ⚠️ SEULS <strong> ET <br> SONT STOCKÉS (main.js n'interprète qu'eux) ; un texte non touché se réécrit
+        à l'octet (garde sur le HTML rendu à l'ouverture). Un collage arrive en texte brut.
+     ⚠️ L'ID SE RÉGÉNÈRE QUAND LE TITRE OU LE TEXTE CHANGE, ET SEULEMENT ALORS (décidé le 28/10). Le site
+        mémorise la fermeture PAR ID : un nouveau titre ou texte se montre à nouveau à tous, y compris à
+        ceux qui avaient fermé l'ancien. Dates, format, affichage : l'id ne bouge pas.
+     ⚠️ label, urgences, memoriser ne sont plus réglés ici : ils sont restitués tels quels. */
   message(carte, donnee){
     const o = donnee || {};
+    const ligne = (classe, enfants) => el('li', { class: 'f-ligne ' + classe }, enfants);
     const actif = interrupteur('Afficher le message sur le site', o.actif);
-    const typePop = el('input', { type: 'radio', name: 'msg-type', value: 'popup' });
     const typeBan = el('input', { type: 'radio', name: 'msg-type', value: 'banniere' });
-    (o.type === 'banniere' ? typeBan : typePop).checked = true;
-    const format = el('div', { class: 'fld' }, [el('span', { class: 'fld-l', text: 'Format' }), el('div', { class: 'seg' }, [
-      el('label', {}, [typePop, el('span', { text: 'Popup' })]), el('label', {}, [typeBan, el('span', { text: 'Bannière en haut' })])])]);
-    const label = champ('input', { type: 'text' }, o.label);
-    const titre = champ('input', { type: 'text' }, o.titre);
-    const texteInitial = versSaisie(o.texte);
-    const texte = champ('textarea', { rows: '4' }, texteInitial);
-    const debut = champ('input', { type: 'date' }, o.dateDebut);
-    const fin = champ('input', { type: 'date' }, o.dateFin);
-    const urg = interrupteur('Afficher les numéros d’urgence', o.urgences);
-    const groupeLabel = groupe('Petit intitulé (au-dessus du titre)', label);
-    const groupeUrg = el('div', { class: 'fld' }, [urg.noeud, el('p', { class: 'fld-aide', text: 'Les numéros eux-mêmes ne se modifient pas ici.' })]);
-    /* ⚠️ C'est la CARTE qu'on masque en bannière, pas seulement le champ : masquer le seul
-          champ laissait une carte vide (padding + bordure, 34 px) sous les dates. */
-    const carteUrg = el('div', { class: 'ed-carte grain-papier' }, [groupeUrg]);
-    const apercu = el('p', { class: 'ed-etat' });
-
-    const MODELES = [
-      { nom: 'Fermeture annuelle', label: 'Information', titre: 'Fermeture annuelle' },
-      { nom: 'Fermeture exceptionnelle', label: 'Information', titre: 'Fermeture exceptionnelle' },
-      { nom: 'Information', label: 'Information', titre: '' }
-    ];
-    const modeles = el('div', { class: 'chips' }, MODELES.map(m => {
-      const b = el('button', { type: 'button', class: 'chip', text: m.nom });
-      b.addEventListener('click', () => { label.value = m.label; titre.value = m.titre; (m.titre ? texte : titre).focus(); signalerSaisie(); });
-      return b;
-    }));
-
+    const typePop = el('input', { type: 'radio', name: 'msg-type', value: 'popup' });
+    (o.type === 'popup' ? typePop : typeBan).checked = true;
+    const format = el('div', { class: 'seg', role: 'radiogroup', 'aria-label': 'Format' }, [
+      el('label', {}, [typeBan, el('span', { text: 'Bannière en haut' })]), el('label', {}, [typePop, el('span', { text: 'Fenêtre à l’arrivée' })])]);
+    const titre = champ('input', { class: 'f-champ f-msg-titre', type: 'text', autocomplete: 'off', placeholder: 'Titre du message', 'aria-label': 'Titre du message' }, o.titre);
+    /* Le texte : rendu EXACTEMENT comme main.js le lira (fillTexte : <strong>, </strong>, <br>, le reste en texte). */
+    const texte = el('div', { class: 'f-champ f-msg-texte', contenteditable: 'true', role: 'textbox', 'aria-multiline': 'true', 'aria-label': 'Texte du message', 'data-vide': 'Le texte du message' });
+    let f = null;
+    String(o.texte == null ? '' : o.texte).split(/(<\/?strong>|<br\s*\/?>)/i).forEach(m => {
+      const k = m.toLowerCase();
+      if (k === '<strong>'){ f = document.createElement('strong'); texte.appendChild(f); return; }
+      if (k === '</strong>'){ f = null; return; }
+      if (/^<br/.test(k)){ (f || texte).appendChild(document.createElement('br')); return; }
+      if (m) (f || texte).appendChild(document.createTextNode(m));
+    });
+    const texteInitial = texte.innerHTML;
+    texte.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); document.execCommand('insertLineBreak'); } });
+    texte.addEventListener('paste', e => { e.preventDefault(); document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain')); });
+    const gras = el('button', { type: 'button', class: 'f-gras', 'aria-label': 'Mettre en gras la sélection', text: 'Gras' });
+    gras.addEventListener('mousedown', e => e.preventDefault());   // garder la sélection dans le texte
+    gras.addEventListener('click', () => { texte.focus(); document.execCommand('bold'); });
+    /* Lecture du texte : <b>/<strong> → <strong>, retours → <br>, tout le reste en texte brut. */
+    function texteStocke(){
+      if (texte.innerHTML === texteInitial) return o.texte;
+      let out = '';
+      const parcourir = (n, enGras) => n.childNodes.forEach(c => {
+        if (c.nodeType === 3) out += c.nodeValue.replace(/\u00A0/g, ' ').replace(/\r?\n/g, '<br>');   // un retour tapé = <br>
+        else if (c.nodeName === 'BR') out += '<br>';
+        else if (/^(B|STRONG)$/.test(c.nodeName) && !enGras){ out += '<strong>'; parcourir(c, true); out += '</strong>'; }
+        else if (/^(DIV|P)$/.test(c.nodeName)){ if (out && !out.endsWith('<br>')) out += '<br>'; parcourir(c, enGras); }
+        else parcourir(c, enGras);
+      });
+      parcourir(texte, false);
+      /* Un retour à la ligne collé au bord du gras sort du gras (même rendu, fichier propre). */
+      let s = out, avant;
+      do { avant = s; s = s.replace(/<br><\/strong>/g, '</strong><br>').replace(/<strong><br>/g, '<br><strong>'); } while (s !== avant);
+      return s.replace(/<strong><\/strong>/g, '').replace(/(<br>)+$/, '').trim();
+    }
+    const debut = champ('input', { class: 'f-champ f-date', type: 'date', 'aria-label': 'Afficher à partir du' }, o.dateDebut);
+    const fin = champ('input', { class: 'f-champ f-date', type: 'date', 'aria-label': 'Afficher jusqu’au (inclus)' }, o.dateFin);
+    const ligneTitre = ligne('f-ligne--titre', [titre, el('span', { class: 'f-manque', text: 'Il manque le titre' })]);
+    const ligneTexte = ligne('f-ligne--texte', [texte, el('span', { class: 'f-outils' }, [gras])]);
+    const ligneDu = ligne('f-ligne--date', [el('span', { class: 'f-lib', text: 'Du' }), debut]);
+    const ligneAu = ligne('f-ligne--date', [el('span', { class: 'f-lib', text: 'Au (inclus)' }), fin, el('span', { class: 'f-manque', text: 'La fin est avant le début' })]);
+    const feuille = el('div', { class: 'feuille grain-papier' }, [
+      el('section', { class: 'f-groupe' }, [el('ul', { class: 'f-lignes' }, [ligne('f-ligne--seule', [actif.noeud]), ligne('f-ligne--seule', [format])])]),
+      el('section', { class: 'f-groupe' }, [el('h2', { class: 'f-titre', text: 'Ce qu’il dit' }), el('ul', { class: 'f-lignes' }, [ligneTitre, ligneTexte])]),
+      el('section', { class: 'f-groupe' }, [el('h2', { class: 'f-titre', text: 'Quand' }),
+        el('p', { class: 'f-note', text: 'Laissez vide pour commencer tout de suite, ou pour ne jamais s’arrêter. Le message s’éteint seul après la date de fin.' }),
+        el('ul', { class: 'f-lignes' }, [ligneDu, ligneAu])])
+    ]);
+    const legende = el('p', { class: 'f-legende' });
     const nouvelId = 'msg-' + Date.now().toString(36);   // fixé à l'ouverture : stable tant qu'on reste dans l'écran
     function lireBrut(){
-      const t = garde(titre, o.titre), d = debut.value, f = fin.value;
-      const tx = texte.value === texteInitial ? o.texte : versHTML(texte.value.trim());
-      const contenuChange = t !== o.titre || tx !== o.texte || d !== (o.dateDebut || '') || f !== (o.dateFin || '');
+      const t = garde(titre, o.titre), tx = texteStocke();
+      const contenuChange = t !== o.titre || tx !== o.texte;
       return { ...o,
         actif: actif.box.checked,
-        type: typeBan.checked ? 'banniere' : 'popup',
+        type: typePop.checked ? 'popup' : 'banniere',
         id: (contenuChange || !o.id) ? nouvelId : o.id,
-        dateDebut: d, dateFin: f,
-        label: garde(label, o.label), titre: t, texte: tx,
-        urgences: urg.box.checked,
-        memoriser: o.memoriser !== undefined ? o.memoriser : true };
+        dateDebut: debut.value, dateFin: fin.value,
+        titre: t, texte: tx };
     }
-    function majApercu(){
+    const manques = r => [r.actif && !String(r.titre || '').trim() ? ligneTitre : null, r.dateDebut && r.dateFin && r.dateFin < r.dateDebut ? ligneAu : null].filter(Boolean);
+    function majFeuille(){
       const r = lireBrut();
-      groupeLabel.hidden = carteUrg.hidden = r.type === 'banniere';
+      const m = manques(r);
+      [ligneTitre, ligneAu].forEach(l => l.classList.toggle('f-ligne--manque', m.includes(l)));
       const e = etatMessage(r);
-      apercu.textContent = 'Avec ces réglages : ' + e.val + ' — ' + e.sub;
-      apercu.dataset.etat = e.val;
+      legende.textContent = 'Ce que vos visiteurs liront, sur la page d’accueil : ' + (r.type === 'banniere' ? 'une bannière en haut de la page.' : 'une fenêtre à l’arrivée.')
+        + ' Avec ces réglages : ' + e.val.toLowerCase() + ' — ' + e.sub;
     }
-    const noeud = el('div', { class: 'ed-liste' }, [
-      el('div', { class: 'ed-carte grain-papier' }, [actif.noeud, apercu]),
-      el('div', { class: 'ed-carte grain-papier' }, [el('div', { class: 'fld' }, [el('span', { class: 'fld-l', text: 'Partir d’un modèle' }), modeles]), format, groupeLabel,
-        groupe('Titre', titre), groupe('Texte', texte, 'Mettez un passage **entre deux astérisques** pour l’écrire en gras.')]),
-      el('div', { class: 'ed-carte grain-papier' }, [el('div', { class: 'fld-duo' }, [groupe('Du', debut), groupe('Au (inclus)', fin)]),
-        el('p', { class: 'fld-aide', text: 'Laissez vide pour commencer tout de suite / ne jamais s’arrêter. Le message s’éteint seul après la date de fin.' })]),
-      carteUrg
-    ]);
-    noeud.addEventListener('input', majApercu);
-    noeud.addEventListener('change', majApercu);
-    noeud.addEventListener('click', () => setTimeout(majApercu, 0));
-    majApercu();
+    feuille.addEventListener('input', majFeuille);
+    feuille.addEventListener('change', majFeuille);
+    majFeuille();
     return {
-      noeud,
+      noeud: el('div', { class: 'ed-feuille' }, [feuille, legende]),
+      titre: 'Message d’info',
+      surtitre: 'Page d’accueil : bannière en haut ou fenêtre à l’arrivée',
+      aCorriger(){ return manques(lireBrut()).length; },
+      libelleACorriger: m => m + ' point' + (m > 1 ? 's' : '') + ' à corriger',
       lire(){
         const r = lireBrut();
         if (r.actif && !String(r.titre || '').trim()) throw new Error('Donnez un titre au message.');

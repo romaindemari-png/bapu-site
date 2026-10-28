@@ -40,6 +40,7 @@ scripts/test-accueil.js             Coquille (barre, volet compte) et phrase d'a
 scripts/test-cartes.js              Les 2 cartes de Mon site (ordre, états du message, vraies adresses), captures par état
 scripts/test-publier.js             Publier à 4 états : « en ligne » seulement sur preuve (relecture du fichier public), horloge accélérée
 scripts/test-feuille-adresses.js    Feuille « Adresses & téléphones » : gestes → JSON écrit à la main ; le numéro atteint les 5 endroits du site
+scripts/test-feuille-message.js     Feuille « Message d'info » : gestes → JSON à la main ; id régénéré seulement si titre/texte changent ; bannière/fenêtre sur le site
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)
@@ -100,7 +101,7 @@ Les pages légales réutilisent `css/styles.css` (section scopée `.legal`) et `
 
 ## Réglages clés
 
-- **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : un nouveau message = un nouvel `id`. Voir `README.md`.
+- **Popup / bandeau d'information** : contenu dans `_data/info.json` (édité via l'admin), lu par `js/main.js`. Mémorisation par `id` : l'admin régénère l'`id` quand le **titre ou le texte** change, et seulement alors (décidé le 28/10 : dates, format, affichage gardent l'id). Voir `README.md`.
 - **Contenus injectés** (textes Accueil, adresses, téléphones) : `_data/*.json` injectés par `js/lelab-sante-loader.js` via les marqueurs `cms-*` — ne pas retirer ces classes/ids du HTML.
 - **Éditables par le client** : adresses, téléphones, message d'info. **Textes d'accueil FIGÉS** (validés) : toujours servis par `_data/textes.json`, mais le bloc `accueil` de `config.json` n'a plus d'`admin.edit` → pas de carte dans l'admin, et `save-data` refuse la section. Pour réactiver : remettre `"edit": "accueil"` (libellés et encart sont restés dans la config).
 - **Libellés de l'admin (textes)**, si l'éditeur est réactivé : chaque paragraphe de `_data/textes.json` porte un `role` ; le libellé vient de `config.json → admin.libelles[role]`. Paragraphe sans role → numérotation. Ne jamais revenir à un libellé par position (une suppression décalerait tous les libellés).

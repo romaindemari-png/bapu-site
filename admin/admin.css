@@ -153,7 +153,7 @@ body:not(.authed) .app{display:none}
    Une ligne = un filet, sans fond ni carte ; la ligne en cours surlignée (--surlignage, rayon 10) ; le champ
    actif souligné --violet-encre 2 px ; une ligne fausse : surlignage + message en --violet-encre. */
 .ed-feuille{display:flex;flex-direction:column;gap:var(--sp-3)}
-.feuille{background:var(--papier);color:var(--encre);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-4) var(--sp-2);display:flex;flex-direction:column;gap:var(--sp-5)}
+.feuille{color-scheme:light;background:var(--papier);color:var(--encre);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-4) var(--sp-2);display:flex;flex-direction:column;gap:var(--sp-5)}
 .f-groupe{display:flex;flex-direction:column}
 .f-titre{font:400 28px/1.05 var(--serif);letter-spacing:-.015em;margin-bottom:var(--sp-1)}
 .f-note{font-size:14px;color:var(--papier-2);margin-bottom:var(--sp-2)}
@@ -172,6 +172,18 @@ body:not(.authed) .app{display:none}
 .f-ligne--manque .f-manque{display:block}
 .f-legende{font-size:14px;line-height:1.45;color:var(--texte-2)}
 @media (min-width:961px){ .feuille{padding:var(--sp-6) var(--sp-6) var(--sp-3)} .f-tel{font-size:24px} }
+/* La feuille du message (B6) : réglages en tête, puis ce qu'il dit, puis quand. */
+.f-ligne--seule,.f-ligne--titre,.f-ligne--texte{grid-template-columns:1fr}
+.f-groupe:first-child .f-lignes > .f-ligne:first-child{border-top-color:transparent}   /* pas de filet au-dessus de rien */
+.f-ligne--seule{padding-top:10px;padding-bottom:10px}
+.f-msg-titre{font:400 24px/1.15 var(--serif);letter-spacing:-.01em}
+.f-msg-texte{min-height:96px;line-height:1.5;overflow-wrap:anywhere;cursor:text;-webkit-user-select:text;user-select:text}
+.f-msg-texte:empty::before{content:attr(data-vide);color:var(--papier-2)}
+.f-msg-texte strong,.f-msg-texte b{font-weight:600}
+.f-outils{display:flex;justify-content:flex-end;padding-bottom:6px}
+.f-gras{min-height:44px;padding:0 16px;border-radius:var(--r-pill);border:1.5px solid var(--papier-2);color:var(--encre);font:600 14px/1 var(--sans)}
+.f-ligne--date{grid-template-columns:110px 1fr}
+.f-date{text-align:right}
 .retour{font-size:14px;font-weight:600;color:var(--texte);padding:0 var(--sp-4);margin-bottom:var(--sp-4);min-height:44px;border:1.5px solid var(--contour);border-radius:var(--r-pill)}
 .lieu{display:flex;gap:var(--sp-3);background:var(--papier);color:var(--encre);border-radius:var(--r-md);padding:var(--sp-4);margin:var(--sp-4) 0 var(--sp-5)}
 .lieu[hidden]{display:none}
