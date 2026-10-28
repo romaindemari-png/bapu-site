@@ -51,7 +51,7 @@ body:not(.authed) .app{display:none}
 .barre{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
   padding:calc(var(--sp-3) + env(safe-area-inset-top)) var(--sp-4) var(--sp-3);max-width:1360px;margin:0 auto;position:relative;z-index:5}
 .barre-logo{display:flex;align-items:center}
-.barre-logo img{height:34px;width:auto}
+.barre-logo img{height:51px;width:auto}   /* × 1,5 (B7) : le PNG fourni, sans retouche */
 .compte{position:relative}
 .avatar-init{width:44px;height:44px;border-radius:50%;background:var(--a-voir);color:var(--a-voir-texte);
   font:600 14px/1 var(--sans);letter-spacing:.02em;display:flex;align-items:center;justify-content:center}
@@ -62,6 +62,7 @@ body:not(.authed) .app{display:none}
 .vc-nom{font:400 24px/1.1 var(--serif)}
 .vc-cabinet{font-size:14px;color:var(--papier-2)}
 .vc-cabinet:empty{display:none}
+.vc-nuit{margin-top:var(--sp-1)}
 .vc-sortie{margin-top:var(--sp-2);min-height:44px;padding:0 18px;border-radius:var(--r-pill);color:var(--encre);
   border:1.5px solid var(--papier-2);font:500 14px/1 var(--sans)}
 

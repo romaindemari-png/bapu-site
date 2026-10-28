@@ -6,6 +6,26 @@
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex, nofollow">
 <title>LeLab — Votre espace</title>
+<!-- LA CHROMIE AVANT LA PREMIÈRE IMAGE (B7, 28/10). Ordre : le choix de l'appareil (« Nuit » du volet compte,
+     localStorage) → la valeur du client (config.json → "chromie") → le réglage du téléphone (prefers-color-scheme).
+     Sans choix retenu, la page reste MASQUÉE (html.chromie-attente, règle dans charte.css) le temps de lire
+     config.json, 1,5 s au plus : jamais un flash de l'autre chromie. localStorage peut lever : try/catch. -->
+<script>
+(function(){
+  var h = document.documentElement, choix = null;
+  try { choix = localStorage.getItem('lelab_chromie'); } catch (e) {}
+  if (choix === 'jour' || choix === 'nuit'){ h.setAttribute('data-chromie', choix); return; }
+  h.classList.add('chromie-attente');
+  var fini = false;
+  function poser(c){
+    if (fini) return; fini = true;
+    if (c === 'jour' || c === 'nuit') h.setAttribute('data-chromie', c);
+    h.classList.remove('chromie-attente');
+  }
+  fetch('/_data/config.json').then(function(r){ return r.ok ? r.json() : null; }).then(function(c){ poser(c && c.chromie); }, function(){ poser(null); });
+  setTimeout(function(){ poser(null); }, 1500);
+})();
+</script>
 <link rel="stylesheet" href="charte.css">
 <link rel="stylesheet" href="admin.css">
 <!-- Cœur auth + lecture : copie à l'octet du master LeLab (voir son en-tête). -->
@@ -46,8 +66,8 @@
   <!-- ═══ BARRE HAUTE (B2, LELAB-DESIGN §4) : le logo LeLab et l'avatar. Pas de segment : BAPU est LeLab. ═══ -->
   <header class="barre">
     <span class="barre-logo">
-      <img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="62" height="34" loading="lazy">
-      <img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="62" height="34" loading="lazy">
+      <img class="logo-nuit" src="assets/logo-lelab-blanc-h.png" alt="LeLab" width="92" height="51" loading="lazy">
+      <img class="logo-jour" src="assets/logo-lelab-noir-h.png" alt="LeLab" width="92" height="51" loading="lazy">
     </span>
     <!-- L'avatar ouvre un VOLET (prénom, cabinet, « Se déconnecter ») : un toucher ne déconnecte jamais seul.
          « Mon compte » viendra à son bout. Pas de confirm() : il ne s'affiche pas partout. -->
@@ -57,6 +77,8 @@
       <div class="volet-compte" id="voletCompte" hidden>
         <p class="vc-nom" id="voletNom"></p>
         <p class="vc-cabinet" id="voletCabinet"></p>
+        <!-- « Nuit » : retenu sur cet appareil, prend le pas sur la chromie du client (B7). -->
+        <label class="switch vc-nuit"><input type="checkbox" role="switch" id="voletNuit"><span class="switch-piste" aria-hidden="true"></span><span class="switch-t">Nuit</span></label>
         <button type="button" class="vc-sortie" onclick="fermerVoletCompte();doLogout()">Se déconnecter</button>
       </div>
     </div>

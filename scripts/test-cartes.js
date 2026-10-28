@@ -7,13 +7,14 @@
    état du message (jamais écrit) ; save-data INTERCEPTÉ ; HORLOGE FIGÉE au mercredi 28/10/2026, 10 h.
 
    1. L'ORDRE DU SITE : 01 Message d'info (bannière fixée en haut / fenêtre à l'arrivée), 02 Adresses.
-   2. LE MESSAGE — la couleur dit l'état (§2), le surtitre dit pourquoi :
+   2. LE MESSAGE — la couleur dit l'état (§2), le surtitre dit pourquoi (chromie IMPOSÉE par la sonde, nuit) :
         en ligne, fin lointaine ...... papier  « 01 · Jusqu’au 31 déc. »
         fin dans 7 jours ou moins .... violet  « 01 · Jusqu’au 31 oct. »
         terminé, encore actif ........ violet  « 01 · Terminé le 25/10 : à retirer ou à remplacer »
         désactivé .................... contour « 01 · Masqué »
         programmé .................... papier  « 01 · Programmé le 2 nov. »
       puis le titre du message et « Bannière · page d’accueil » / « Fenêtre · page d’accueil ».
+   2bis. CHAQUE CHROMIE, imposée : « à voir » violet la nuit, encre le jour ; adresses en papier dans les deux.
    3. LES ADRESSES — valeurs lues dans coordonnees.json (copie gelée) : téléphone : le standard en
       grand ; desktop : quatre lignes à filets (standard, portable, Marseille, Aix).
    4. AUCUNE MINIATURE SUR BLANC : aucun fond #FFFFFF dans les cartes.
@@ -42,6 +43,8 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     const p = await b.newPage();
     await p.setViewport({ width: largeur, height: largeur > 960 ? 900 : 844, isMobile: largeur <= 960, deviceScaleFactor: 2 });
     await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: chromie === 'nuit' ? 'dark' : 'light' }, { name: 'prefers-reduced-motion', value: 'reduce' }]);
+    /* B7 : la chromie du client (config.json, « jour » chez BAPU) l'emporte sur le téléphone ; on pose le choix de l'appareil. */
+    await p.evaluateOnNewDocument(c => { try { localStorage.setItem('lelab_chromie', c); } catch (e) {} }, chromie);
     await p.evaluateOnNewDocument(T => {
       const D = Date;
       class Fige extends D { constructor(...a){ a.length ? super(...a) : super(T); } static now(){ return T; } }
@@ -105,6 +108,19 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
         ok(`message ${nom} : flèche, aucun fond blanc`, m.fleche && cs.every(c => c.blancs === 0), JSON.stringify(cs.map(c => c.blancs)));
       }
       if (CAPTURES) await p.screenshot({ path: path.join(CAPTURES, `b3-${largeur}-message-${nom}.png`), fullPage: true });
+      await p.close();
+    }
+  }
+
+  /* 2bis. LA COULEUR « À VOIR » DANS CHAQUE CHROMIE, imposée par la sonde (choix de l'appareil) : nuit → violet
+     (--a-voir #CAB4FF), jour → encre (--a-voir #1A1917). Le papier et le contour ne changent pas. */
+  const ENCRE = 'rgb(26, 25, 23)';
+  for (const [nom, inf] of [ETATS[1], ETATS[2]].map(e => [e[0], e[1]])){
+    for (const [chromie, attendu] of [['nuit', VIOLET], ['jour', ENCRE]]){
+      const p = await ouvrir({ info: inf, chromie });
+      const r = await p.evaluate(() => ({ chromie: document.documentElement.dataset.chromie, fond: getComputedStyle(document.querySelector('#siteCards .card[data-edit="message"]')).backgroundColor,
+                                          adresses: getComputedStyle(document.querySelector('#siteCards .card[data-edit="coordonnees"]')).backgroundColor }));
+      ok(`message ${nom}, ${chromie} : à voir = ${chromie === 'nuit' ? 'violet' : 'encre'}, adresses en papier`, r.chromie === chromie && r.fond === attendu && r.adresses === PAPIER, JSON.stringify(r));
       await p.close();
     }
   }
