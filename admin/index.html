@@ -69,17 +69,13 @@
         <div class="accueil-col">
           <!-- La phrase d'accueil dit l'état réel du site (§4). Écrite par renderAccueil(). -->
           <h1 class="accueil" id="accueilTitre"><span id="accueilSalut">Bonjour.</span><span id="accueilEtat">Votre site est à jour.</span></h1>
-          <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne">En ligne</span></div>
+          <!-- La pastille porte l'état : « En ligne », « Publication… » pendant une mise en ligne (majPastille). -->
+          <div class="etat-chips"><span class="etat-chip etat-chip--en-ligne" id="chipEtat" role="status">En ligne</span></div>
         </div>
         <div class="cartes-col">
           <div class="cards" id="siteCards"></div>
         </div>
         <div class="pied-col">
-          <!-- Le bouton de l'accueil : l'état de la dernière publication, ou « Tout est en ligne » (majPiedAccueil). -->
-          <div class="accueil-pub">
-            <button class="btn btn--block btn-pub pub--repos" id="btnAccueil" type="button" disabled>Tout est en ligne</button>
-            <p class="pub-ligne" id="accueilLigne"><span class="pub-phrase">Ouvrez une carte pour la modifier.</span></p>
-          </div>
           <p class="reste">Le reste du site, c’est nous. <a href="mailto:contact@lestudmarseille.fr?subject=BAPU%20%E2%80%94%20une%20demande%20pour%20le%20site">Demander au studio</a></p>
           <a class="site-link" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
         </div>

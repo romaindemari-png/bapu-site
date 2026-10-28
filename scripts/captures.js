@@ -20,6 +20,7 @@ const ADR = "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))";
 const ECRANS = [
   ['1-accueil', ''],
   ['2-volet-compte', 'basculerVoletCompte()'],
+  ['2b-accueil-publication', "window.__LELAB_TEMPS = 1; const p = debutPublication('coordonnees'); publicationEnvoyee(p, { ...donnees.coordonnees, x: 1 })"],
   ['3-adresses', "openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))"],
   ['4-message', MSG],
   ['6-publier-modifie', ADR + "; const t = document.querySelectorAll('#editCorps input[type=tel]')[1]; t.value = '06 12 34 56 78'; t.dispatchEvent(new Event('input', { bubbles: true }))"],

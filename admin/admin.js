@@ -147,7 +147,7 @@ function renderAccueil(){
   document.getElementById('avatarInit').textContent = initialesAvatar();
   document.getElementById('voletNom').textContent = prenomDuProfil() || cabinet.nom || '';
   document.getElementById('voletCabinet').textContent = prenomDuProfil() ? (cabinet.nom || '') : '';
-  majPiedAccueil();
+  majPastille();
 }
 
 /* ═══ LE VOLET DU COMPTE — ouvert par l'avatar, fermé dehors, par Échap ou par un second toucher ═══ */
@@ -574,16 +574,15 @@ function annulerEdition(){
       clé, à ce qu'on a envoyé. Rien d'autre ne l'affiche. Aucune promesse de délai avant la preuve.
    ⚠️ 120 s sans preuve → repos SANS dire « en ligne » (« Envoyé », phrase du délai long).
    ⚠️ LA RELECTURE NE DÉPEND PAS DE L'ÉCRAN : elle continue si l'on revient à « Mon site » ; la phrase
-      d'accueil dit « Une publication est en cours. » et le bouton de l'accueil suit, jusqu'à la preuve.
+      d'accueil dit « Une publication est en cours. » et la pastille « Publication… », jusqu'à la preuve.
+      Pas de bouton sur l'accueil (décidé le 28/10) : l'état y est porté par la pastille et la phrase.
    ⚠️ PLUS DE FERMETURE AUTOMATIQUE À 1,2 s : l'éditeur reste ouvert et repart de ce qu'on vient d'envoyer.
    Remplissage : 0,85 × (1 − e^(−t/τ)), τ = 40 s / ln 20 ; jamais au-delà de 85 % sans preuve.
    HORLOGE DE TEST : window.__LELAB_TEMPS (0 < k ≤ 1) multiplie les trois durées (scripts/test-publier.js).
    ⚠️ ABSENTE EN PROD → durées nominales. */
 const PUBLIER_INTERVALLE = 3000, PUBLIER_DELAI_MAX = 120000, PUBLIER_COURBE = 40000, PUBLIER_PLAFOND = 0.85;
 const IDS_EDITION = { btn: 'btnPublier', ligne: 'publierLigne' };
-const IDS_ACCUEIL = { btn: 'btnAccueil', ligne: 'accueilLigne' };
 const PHRASE_REPOS = 'Modifiez un champ et le bouton s’allume.';
-const PHRASE_ACCUEIL = 'Ouvrez une carte pour la modifier.';
 const PHRASE_ENVOI = 'Envoi en cours.';
 const PHRASE_ENVOYE = 'Envoyé. On vérifie que c’est en ligne…';
 const PHRASE_EN_LIGNE = 'Vos visiteurs le voient déjà.';
@@ -635,7 +634,8 @@ function remplissage(pub, t){
   return PUBLIER_PLAFOND * (1 - Math.exp(-(t - pub.t0) / (pub.duree.courbe / Math.log(20))));
 }
 function boutonsDe(fichier){
-  return [IDS_EDITION, IDS_ACCUEIL].map(ids => document.getElementById(ids.btn)).filter(b => b && b.dataset.pub === fichier);
+  const b = document.getElementById(IDS_EDITION.btn);
+  return b && b.dataset.pub === fichier ? [b] : [];
 }
 function peindreRemplissage(btn, f, t){
   const h = btn.offsetHeight || 58, s = (1 - f) * (h + 8) - 8, vx = (t / 25) % 40;
@@ -657,7 +657,7 @@ function animerPublications(){
   if (encore) boucleRemplissage = requestAnimationFrame(animerPublications);
 }
 function relancerBoucle(){ if (!boucleRemplissage) boucleRemplissage = requestAnimationFrame(animerPublications); }
-/* Pose l'état d'une publication en vol sur un bouton (l'éditeur, l'accueil). */
+/* Pose l'état d'une publication en vol sur le bouton de l'éditeur. */
 function peindrePublication(pub, ids){
   const btn = document.getElementById(ids.btn);
   if (!btn) return;
@@ -677,21 +677,22 @@ function majBoutonPublier(){
   else if (n === 0) etatPublier(IDS_EDITION, 'pub--repos', 'Tout est en ligne', PHRASE_REPOS, false);
   else etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', erreurPublication === f ? PHRASE_ECHEC : n, true);
 }
-/* Le bouton de l'accueil : il ne publie rien lui-même (BAPU n'a pas d'interrupteur sur « Mon site ») ;
-   il dit l'état de la dernière publication, ou le repos. */
-function majPiedAccueil(){
-  const pubs = Object.values(publications);
-  const enVol = pubs.find(p => p.etat === 'envoi' || p.etat === 'envoye');
-  if (enVol) return peindrePublication(enVol, IDS_ACCUEIL);
-  if (pubs.some(p => p.etat === 'fin')) return;
-  if (Object.values(statutPublication).includes('longue')) etatPublier(IDS_ACCUEIL, 'pub--repos', 'Envoyé', PHRASE_LONGUE, false);
-  else etatPublier(IDS_ACCUEIL, 'pub--repos', 'Tout est en ligne', PHRASE_ACCUEIL, false);
+/* La pastille de l'accueil : « Publication… » tant qu'une publication est en vol (envoi, ou envoyée sans
+   preuve), « Envoyé » si la preuve tarde au-delà du délai, sinon « En ligne ». Pas de bouton sur l'accueil. */
+function majPastille(){
+  const chip = document.getElementById('chipEtat');
+  if (!chip) return;
+  const enVol = Object.values(publications).some(p => p.etat === 'envoi' || p.etat === 'envoye');
+  const longue = Object.values(statutPublication).includes('longue');
+  chip.classList.toggle('etat-chip--en-ligne', !enVol && !longue);
+  chip.classList.toggle('etat-chip--envoi', enVol || longue);
+  chip.textContent = enVol ? 'Publication…' : longue ? 'Envoyé' : 'En ligne';
 }
 function debutPublication(fichier){
   const pub = { fichier, t0: performance.now(), etat: 'envoi', f: 0, duree: dureesPublier() };
   publications[fichier] = pub;
   delete statutPublication[fichier];
-  majBoutonPublier(); majPiedAccueil();
+  majBoutonPublier(); majPastille();
   relancerBoucle();
   return pub;
 }
@@ -725,25 +726,21 @@ function confirmerPublication(pub){
 }
 /* Le remplissage est à 100 % : « ✓ C'est en ligne », saut, anneau ; repos 3 s plus tard. */
 function annoncerEnLigne(pub){
-  const portes = boutonsDe(pub.fichier);
+  const porte = boutonsDe(pub.fichier).length > 0;
   delete publications[pub.fichier];
-  [IDS_EDITION, IDS_ACCUEIL].forEach(ids => {
-    const btn = document.getElementById(ids.btn);
-    if (!btn || !portes.includes(btn)) return;
-    etatPublier(ids, 'pub--confirme', '✓ C’est en ligne', PHRASE_EN_LIGNE, false);
-    btn.dataset.confirme = pub.fichier;
-  });
+  majPastille();
+  if (!porte) return;
+  etatPublier(IDS_EDITION, 'pub--confirme', '✓ C’est en ligne', PHRASE_EN_LIGNE, false);
+  const btn = document.getElementById(IDS_EDITION.btn);
+  btn.dataset.confirme = pub.fichier;
   setTimeout(() => {
-    [[IDS_EDITION, majBoutonPublier], [IDS_ACCUEIL, majPiedAccueil]].forEach(([ids, maj]) => {
-      const b = document.getElementById(ids.btn);
-      if (b && b.dataset.confirme === pub.fichier && b.classList.contains('pub--confirme')){ delete b.dataset.confirme; maj(); }
-    });
+    if (btn.dataset.confirme === pub.fichier && btn.classList.contains('pub--confirme')){ delete btn.dataset.confirme; majBoutonPublier(); }
   }, 3000);
 }
 function publicationLongue(pub){
   delete publications[pub.fichier];
   statutPublication[pub.fichier] = 'longue';
-  majBoutonPublier(); majPiedAccueil(); renderAccueil();
+  majBoutonPublier(); majPastille(); renderAccueil();
 }
 /* save-data a échoué : retour à « Publier », rien n'est relu, rien n'est perdu. */
 function publicationEchouee(pub){
@@ -751,7 +748,7 @@ function publicationEchouee(pub){
   delete publications[pub.fichier];
   delete statutPublication[pub.fichier];
   erreurPublication = pub.fichier;
-  majBoutonPublier(); majPiedAccueil(); renderAccueil();
+  majBoutonPublier(); majPastille(); renderAccueil();
 }
 
 async function publier(){

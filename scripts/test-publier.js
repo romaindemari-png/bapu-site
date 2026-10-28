@@ -22,8 +22,8 @@
    C. save-data 500 → retour à « Publier », saisie intacte, phrase d'échec, AUCUNE relecture.
    D. prefers-reduced-motion → aucun remplissage, mêmes textes, « ✓ C'est en ligne » à la preuve.
    E. On revient à « Mon site » pendant la mise en ligne → la relecture continue ; la phrase d'accueil
-      dit « Une publication est en cours. » et le bouton de l'accueil « Envoyé · mise en ligne… »,
-      jusqu'à la preuve, puis « ✓ C'est en ligne » et le repos.
+      dit « Une publication est en cours. » et la pastille « Publication… » jusqu'à la preuve, puis
+      « En ligne ». L'accueil n'a pas de bouton (décidé le 28/10).
    ============================================================ */
 const fs = require('fs');
 const path = require('path');
@@ -190,17 +190,16 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
     await p.evaluate(() => { publier(); });   // sans attendre l'envoi : « Publication… » doit se voir
     await suivre(p, e => e.txt === 'Envoyé · mise en ligne…', 3000);
     await p.evaluate(() => { const r = document.querySelector('#screen-edit.active .retour'); if (r) r.click(); });
-    const accueil = ['btnAccueil', 'accueilLigne'];
-    const a0 = await lire(p, accueil);
-    const phrase0 = await p.evaluate(() => document.getElementById('accueilEtat').textContent.trim());
-    ok('E · sur Mon site : « Une publication est en cours. »', phrase0 === 'Une publication est en cours.' && !a0.edition, JSON.stringify([phrase0, a0.edition]));
-    ok('E · le bouton de l’accueil : « Envoyé · mise en ligne… »', a0.txt === 'Envoyé · mise en ligne…', a0.txt);
-    const s = await suivre(p, e => /C.est en ligne/.test(e.txt), 8000, accueil);
-    ok('E · la relecture continue hors de l’éditeur : « ✓ C’est en ligne » à la preuve', /C.est en ligne/.test(s.e.txt) && j.relectures >= 6, JSON.stringify({ txt: s.e.txt, relectures: j.relectures }));
-    const phrase1 = await p.evaluate(() => document.getElementById('accueilEtat').textContent.trim());
-    ok('E · après la preuve, la phrase d’accueil redit l’état du site', phrase1 !== 'Une publication est en cours.', phrase1);
-    const s2 = await suivre(p, e => e.txt === 'Tout est en ligne', REPOS_MS + 2000, accueil);
-    ok('E · accueil au repos 3 s après', s2.e.txt === 'Tout est en ligne' && s2.e.ligne === 'Ouvrez une carte pour la modifier.', JSON.stringify([s2.e.txt, s2.e.ligne]));
+    const etatAccueil = () => p.evaluate(() => ({ phrase: document.getElementById('accueilEtat').textContent.trim(),
+      chip: (document.getElementById('chipEtat') || {}).textContent, edition: document.getElementById('screen-edit').classList.contains('active'),
+      bouton: !!document.querySelector('#screen-monsite .btn-pub, #btnAccueil') }));
+    const a0 = await etatAccueil();
+    ok('E · sur Mon site : « Une publication est en cours. »', a0.phrase === 'Une publication est en cours.' && !a0.edition, JSON.stringify(a0));
+    ok('E · la pastille dit « Publication… », et l’accueil n’a pas de bouton', a0.chip === 'Publication…' && !a0.bouton, JSON.stringify(a0));
+    const t0 = Date.now(); let a1 = a0;
+    while (Date.now() - t0 < 8000 && a1.chip !== 'En ligne'){ await pause(20); a1 = await etatAccueil(); }
+    ok('E · la relecture continue hors de l’éditeur : pastille « En ligne » à la preuve, pas avant', a1.chip === 'En ligne' && j.relectures >= 6, JSON.stringify({ ...a1, relectures: j.relectures }));
+    ok('E · après la preuve, la phrase d’accueil redit l’état du site', a1.phrase !== 'Une publication est en cours.', a1.phrase);
     await ctx.close();
   }
 

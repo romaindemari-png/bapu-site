@@ -82,6 +82,7 @@ body:not(.authed) .app{display:none}
 .etat-chips{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-4)}
 .etat-chip{display:inline-flex;align-items:center;gap:7px;font:500 13px/1 var(--sans);padding:9px 14px;border-radius:var(--r-pill)}
 .etat-chip--en-ligne{background:var(--en-ligne);color:var(--encre)}
+.etat-chip--envoi{background:var(--a-voir);color:var(--a-voir-texte)}
 .reste{font-size:14px;color:var(--texte-2)}
 .reste a{color:var(--texte);font-weight:600;text-underline-offset:3px;display:inline-block;min-height:24px}
 .site-link{display:inline-flex;align-items:center;font-size:14px;font-weight:600;color:var(--texte);text-decoration:underline;text-underline-offset:3px;min-height:44px;align-self:flex-start}
@@ -227,8 +228,7 @@ body:not(.authed) .app{display:none}
 .pub-annuler{color:var(--texte);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:0;position:relative}
 /* La cible d'« Annuler » fait 44 px sans agrandir la ligne. */
 .pub-annuler::before{content:'';position:absolute;inset:-12px -10px}
-.accueil-pub{display:flex;flex-direction:column;gap:8px;margin-bottom:var(--sp-4)}
-@media (min-width:961px){ .accueil-pub{max-width:360px} .accueil-pub .pub-ligne{text-align:left} }
+
 .btn--sec{background:transparent;color:var(--encre);border:1.5px solid var(--encre)}
 .quitter{position:fixed;inset:0;background:color-mix(in srgb,var(--encre) 55%,transparent);display:flex;align-items:center;justify-content:center;padding:var(--sp-4);z-index:70}
 .quitter[hidden]{display:none}
