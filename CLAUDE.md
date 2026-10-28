@@ -38,6 +38,7 @@ scripts/mesure-charte-tout.sh       Contraste WCAG de chaque écran de l'admin, 
 scripts/captures.js                 Captures de l'admin (390/1280, nuit/jour) sur les copies gelées
 scripts/test-accueil.js             Coquille (barre, volet compte) et phrase d'accueil, horloge figée, copies gelées
 scripts/test-cartes.js              Les 2 cartes de Mon site (ordre, états du message, vraies adresses), captures par état
+scripts/test-publier.js             Publier à 4 états : « en ligne » seulement sur preuve (relecture du fichier public), horloge accélérée
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)

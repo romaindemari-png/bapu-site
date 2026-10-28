@@ -75,6 +75,11 @@
           <div class="cards" id="siteCards"></div>
         </div>
         <div class="pied-col">
+          <!-- Le bouton de l'accueil : l'état de la dernière publication, ou « Tout est en ligne » (majPiedAccueil). -->
+          <div class="accueil-pub">
+            <button class="btn btn--block btn-pub pub--repos" id="btnAccueil" type="button" disabled>Tout est en ligne</button>
+            <p class="pub-ligne" id="accueilLigne"><span class="pub-phrase">Ouvrez une carte pour la modifier.</span></p>
+          </div>
           <p class="reste">Le reste du site, c’est nous. <a href="mailto:contact@lestudmarseille.fr?subject=BAPU%20%E2%80%94%20une%20demande%20pour%20le%20site">Demander au studio</a></p>
           <a class="site-link" href="/" target="_blank" rel="noopener">Voir mon site en ligne ↗</a>
         </div>
@@ -88,8 +93,12 @@
       <p class="screen-p" id="editSub"></p>
       <div class="lieu grain-papier" id="editLieu" hidden></div>
       <div id="editCorps"></div>
+      <!-- LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) et UNE ligne dessous : la phrase d'aide au repos, « n changements ·
+           Annuler » après un changement — jamais les deux. Écrits par majBoutonPublier(). La ligne a une hauteur fixe :
+           passer de l'une à l'autre ne déplace pas le bouton. -->
       <div class="pied-publier">
-        <button class="btn btn--block" id="btnPublier" type="button" onclick="publier()" disabled>Publier les modifications</button>
+        <button class="btn btn--block btn-pub pub--repos" id="btnPublier" type="button" onclick="publier()" disabled>Tout est en ligne</button>
+        <p class="pub-ligne" id="publierLigne"><span class="pub-phrase">Modifiez un champ et le bouton s’allume.</span><span class="pub-compte" hidden><span class="pub-n"></span><button type="button" class="pub-annuler" onclick="annulerEdition()">Annuler</button></span></p>
       </div>
     </section>
   </main>

@@ -141,7 +141,8 @@ function ok(nom, cond, detail){ total++; if (!cond) echecs++; console.log((cond 
   ok('textes : seul le paragraphe 2 change', env && env.data.accueil[1].texte === 'Confidentialité garantie.' && env.data.accueil[1].fort === true
      && env.data.accueil[0].texte === orig.accueil[0].texte && env.data.accueil[2].texte === orig.accueil[2].texte, JSON.stringify(env && env.data));
   await new Promise(r => setTimeout(r, 1400));
-  ok('après 200 : retour automatique sur « Mon site »', await p.evaluate(() => document.getElementById('screen-monsite').classList.contains('active')));
+  /* B4 (28/10) : plus de fermeture automatique à 1,2 s — l'éditeur reste ouvert, la preuve « en ligne » suit (test-publier). */
+  ok('après 200 : on reste sur l’éditeur (plus de fermeture à 1,2 s)', await p.evaluate(() => document.getElementById('screen-edit').classList.contains('active')));
   ok('après 200 : la mémoire porte l’état écrit (pas de relecture du CDN)', await p.evaluate(() => donnees.textes.accueil[1].texte === 'Confidentialité garantie.'));
 
   await ouvrir(); await ouvrirEdition('accueil');

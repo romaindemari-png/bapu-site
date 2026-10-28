@@ -189,7 +189,46 @@ body:not(.authed) .app{display:none}
 .ed-etat::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--papier-2);flex:none;transform:translateY(-1px)}
 .ed-etat[data-etat="En ligne"]::before{background:var(--en-ligne);box-shadow:0 0 0 1px var(--encre)}
 .ed-etat[data-etat="Programmé"]::before{background:var(--violet-encre)}
-.pied-publier{position:sticky;bottom:0;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4);background:linear-gradient(to top,var(--fond) 70%,transparent)}
+.pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4);background:var(--fond)}
+
+/* ── LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) : pill 58 px, un état = une couleur ──
+   repos : contour, « Tout est en ligne » · modifié : à voir, « Publier » · envoi / envoyé : à voir, le jaune
+   monte · en ligne : jaune plein, « ✓ C'est en ligne », saut et anneau. Reprise de bistrot-sassy (bout 6). */
+.btn.btn-pub{position:relative;isolation:isolate;min-height:58px;border-radius:var(--r-pill);font:600 16px/1 var(--sans);opacity:1}
+.btn.btn-pub.pub--repos{background:transparent;color:var(--texte);cursor:default;
+  border:1.5px solid var(--contour);border-color:color-mix(in srgb,var(--texte) 22%,transparent)}
+.btn.btn-pub.pub--a-voir{background:var(--a-voir);color:var(--a-voir-texte);border:0}
+.btn.btn-pub.pub--envoi,.btn.btn-pub.pub--envoye{background:var(--a-voir);color:var(--a-voir-texte);border:0;cursor:progress}
+/* Le remplissage : ::after = fond --en-ligne + copie du libellé en encre, découpé par un masque (vague + aplat).
+   Sous la vague, toujours encre sur jaune ; au-dessus, le libellé de base. Position écrite par animerPublications().
+   ⚠️ Pas d'apostrophe dans le url() (réécriture Netlify en prod, TECH.md). */
+.btn.btn-pub.remplit::after{content:attr(data-libelle);position:absolute;inset:-1px;border-radius:inherit;
+  display:flex;align-items:center;justify-content:center;padding:inherit;
+  background:var(--en-ligne);color:var(--encre);pointer-events:none;
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%228%22%3E%3Cpath d=%22M0 4Q10 0 20 4T40 4V8H0z%22/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+          mask-image:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%228%22%3E%3Cpath d=%22M0 4Q10 0 20 4T40 4V8H0z%22/%3E%3C/svg%3E"),linear-gradient(#000,#000);
+  -webkit-mask-repeat:repeat-x,no-repeat;mask-repeat:repeat-x,no-repeat;
+  -webkit-mask-size:40px 8px,100% 100%;mask-size:40px 8px,100% 100%;
+  -webkit-mask-position:var(--masque-pos,0 120px,0 120px);mask-position:var(--masque-pos,0 120px,0 120px)}
+.btn.btn-pub.pub--confirme{background:var(--en-ligne);color:var(--encre);border:0;cursor:default}
+.pub--confirme .pub-txt{display:inline-block;animation:pub-saut .5s ease-out}
+.pub-anneau{position:absolute;inset:0;border-radius:inherit;pointer-events:none}
+.pub--confirme .pub-anneau{border:2px solid var(--en-ligne);animation:pub-anneau 1.2s ease-out forwards}
+@keyframes pub-saut{0%{transform:scale(.6)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes pub-anneau{from{transform:scale(1);opacity:1}to{transform:scale(1.18,1.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  .btn.btn-pub.remplit::after{display:none}
+  .pub--confirme .pub-txt,.pub--confirme .pub-anneau{animation:none}
+  .pub--confirme .pub-anneau{border:0}
+}
+/* La ligne sous le bouton : deux lignes de haut, réservées — le bouton ne bouge jamais. */
+.pub-ligne{min-height:calc(2 * 1.45em);font-size:14px;line-height:1.45;text-align:center;color:var(--texte-2)}
+.pub-ligne [hidden]{display:none}
+.pub-annuler{color:var(--texte);font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:0;position:relative}
+/* La cible d'« Annuler » fait 44 px sans agrandir la ligne. */
+.pub-annuler::before{content:'';position:absolute;inset:-12px -10px}
+.accueil-pub{display:flex;flex-direction:column;gap:8px;margin-bottom:var(--sp-4)}
+@media (min-width:961px){ .accueil-pub{max-width:360px} .accueil-pub .pub-ligne{text-align:left} }
 .btn--sec{background:transparent;color:var(--encre);border:1.5px solid var(--encre)}
 .quitter{position:fixed;inset:0;background:color-mix(in srgb,var(--encre) 55%,transparent);display:flex;align-items:center;justify-content:center;padding:var(--sp-4);z-index:70}
 .quitter[hidden]{display:none}
