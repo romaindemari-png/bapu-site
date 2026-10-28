@@ -84,7 +84,11 @@
 
     <!-- ═══ ÉDITION (un éditeur par type de bloc, construit par admin.js) ═══ -->
     <section class="screen" id="screen-edit" aria-labelledby="editTitre">
-      <button class="retour" type="button" data-screen="monsite">‹ Mon site</button>
+      <div class="edit-barre">
+        <button class="retour" type="button" data-screen="monsite">‹ Mon site</button>
+        <span class="etat-chip etat-chip--en-ligne" id="editChip" role="status">En ligne</span>
+      </div>
+      <p class="edit-sur" id="editSur" hidden></p>
       <h1 class="screen-h" id="editTitre"></h1>
       <p class="screen-p" id="editSub"></p>
       <div class="lieu grain-papier" id="editLieu" hidden></div>

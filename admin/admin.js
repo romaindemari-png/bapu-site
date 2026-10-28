@@ -354,53 +354,66 @@ const EDITEURS = {
     };
   },
 
-  /* ── Adresses et téléphones : donnee.sites = [{cle, nom, adresse[], telephone?}]
-     + donnee.telephones = {standard, portable} (optionnel, numéros communs à tous les sites).
-     Le champ téléphone d'un site n'apparaît que si ce site a un `telephone`. ── */
+  /* ── Adresses et téléphones : LA FEUILLE (B5, LELAB-DESIGN §4) ──
+     Schéma réel : donnee.sites = [{cle, nom, adresse[], telephone?}] + donnee.telephones = {standard, portable}
+     (numéros communs aux deux sites). La section du site posée en papier grainé, modifiée SUR PLACE : on
+     clique dans une valeur et on tape. Pas de libellé technique, pas de carte par champ.
+     ⚠️ On ne détruit rien de ce qu'on n'affiche pas ; un champ non touché se réécrit à l'octet (garde).
+     ⚠️ Une ligne d'adresse vidée est retirée ; une adresse entièrement vide est refusée.
+     ⚠️ La carte Google NE SUIT PAS l'adresse (en dur dans index.html) : la feuille le dit. */
   coordonnees(carte, donnee){
     const sites = Array.isArray(donnee && donnee.sites) ? donnee.sites : [];
-    const zone = el('div', { class: 'ed-liste' });
+    const communs = donnee && donnee.telephones && typeof donnee.telephones === 'object' ? donnee.telephones : null;
+    const feuille = el('div', { class: 'feuille grain-papier' });
+    const champsTel = [];
+    function ligneTel(libelle, valeur, attrs){
+      const c = champ('input', { class: 'f-champ f-tel', type: 'tel', inputmode: 'tel', autocomplete: 'off', placeholder: '04 91 50 01 13', 'aria-label': libelle, ...attrs }, valeur);
+      const li = el('li', { class: 'f-ligne' }, [el('span', { class: 'f-lib', text: libelle }), c, el('span', { class: 'f-manque', text: 'Numéro non reconnu. Exemple : 04 91 50 01 13' })]);
+      champsTel.push({ c, li });
+      return { c, li };
+    }
+    const TYPES = [['standard', 'Standard'], ['portable', 'Portable']];
+    const tels = communs ? TYPES.map(([type, libelle]) => ({ type, libelle, ...ligneTel(libelle, communs[type] || '', { 'data-champ': type }) })) : [];
+    if (communs) feuille.appendChild(el('section', { class: 'f-groupe' }, [
+      el('h2', { class: 'f-titre', text: 'Téléphones' }),
+      el('p', { class: 'f-note', text: 'Les mêmes pour Marseille et Aix.' }),
+      el('ul', { class: 'f-lignes' }, tels.map(t => t.li))
+    ]));
     const lignes = sites.map(s => {
       const adr = Array.isArray(s.adresse) ? s.adresse : [];
-      const champsAdr = [0, 1].concat(adr.slice(2).map((_, i) => i + 2)).map(i =>
-        champ('input', { type: 'text', autocomplete: 'off' }, adr[i] || ''));
-      const tel = 'telephone' in s ? champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, s.telephone || '') : null;
       const lieu = s.nom || s.cle;
-      const aides = carte.aides || {};
-      zone.appendChild(el('div', { class: 'ed-carte grain-papier' }, [
-        el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: lieu })]),
-        ...champsAdr.map((c, i) => groupe(lieu + ' — adresse, ligne ' + (i + 1), c, i === champsAdr.length - 1 ? aides.adresse : null)),
-        tel ? groupe(lieu + ' — téléphone', tel, [aides.telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ')) : null
+      const champsAdr = [0, 1].concat(adr.slice(2).map((_, i) => i + 2)).map(i =>
+        champ('input', { class: 'f-champ f-adr', type: 'text', autocomplete: 'off', placeholder: 'Ajouter une ligne',
+                         'data-site': s.cle, 'data-ligne': String(i), 'aria-label': 'Adresse de ' + lieu + ', ' + (i === 0 ? '1re' : (i + 1) + 'e') + ' ligne' }, adr[i] || ''));
+      /* Un site qui porte encore un numéro à lui (fichier d'avant le 23/10) : on le montre, on le réécrit. */
+      const tel = 'telephone' in s ? ligneTel('Téléphone', s.telephone || '', { 'data-site-tel': s.cle }) : null;
+      feuille.appendChild(el('section', { class: 'f-groupe' }, [
+        el('h2', { class: 'f-titre', text: lieu }),
+        el('ul', { class: 'f-lignes' }, champsAdr.map(c => el('li', { class: 'f-ligne f-ligne--adr' }, [c])).concat(tel ? [tel.li] : []))
       ]));
-      return { site: s, champsAdr, tel, adr };
+      return { site: s, champsAdr, tel: tel && tel.c, adr, nom: lieu };
     });
-    const communs = donnee && donnee.telephones && typeof donnee.telephones === 'object' ? donnee.telephones : null;
-    const TYPES = [['standard', 'Standard'], ['portable', 'Portable']];
-    const champsTel = communs ? TYPES.map(([type, libelle]) => ({ type, libelle,
-      c: champ('input', { type: 'tel', inputmode: 'tel', autocomplete: 'off' }, communs[type] || '') })) : [];
-    if (communs){
-      const aide = [(carte.aides || {}).telephone, 'Format : 04 91 50 01 13'].filter(Boolean).join(' ');
-      zone.appendChild(el('div', { class: 'ed-carte grain-papier' }, [
-        el('div', { class: 'ed-carte-h' }, [el('span', { class: 'ed-num', text: 'Téléphones — Marseille & Aix' })]),
-        ...champsTel.map((t, i) => groupe(t.libelle, t.c, i === champsTel.length - 1 ? aide : null))
-      ]));
-    }
+    const legende = el('p', { class: 'f-legende', text: 'Ce que vos visiteurs liront : les numéros sur les boutons d’appel (menu, haut de page, rendez-vous, infos, pied de page), les adresses dans « Adresses. » et en pied de page. La carte Google ne suit pas l’adresse : pour la changer, demandez au studio.' });
+    /* La ligne d'un numéro non reconnu est marquée dès la saisie ; « Publier » attend qu'elle soit juste. */
+    function marquer(){ champsTel.forEach(({ c, li }) => li.classList.toggle('f-ligne--manque', c.value !== c.dataset.initial && !telValide(c.value.trim()))); }
+    feuille.addEventListener('input', marquer);
     return {
-      noeud: zone,
+      noeud: el('div', { class: 'ed-feuille' }, [feuille, legende]),
+      titre: 'Adresses & téléphones',
+      surtitre: 'Partout sur le site : menu, haut de page, rendez-vous, infos, pied de page',
       lire(){
-        const out = lignes.map(({ site, champsAdr, tel, adr }) => {
-          const nom = site.nom || site.cle;
+        const out = lignes.map(({ site, champsAdr, tel, adr, nom }) => {
           const inchangee = champsAdr.every(c => c.value === c.dataset.initial);
           const adresse = inchangee ? adr : champsAdr.map(c => c.value.trim()).filter(Boolean);
-          if (!adresse.length) throw new Error('Adresse vide pour ' + nom + '.');
+          if (!adresse.length) throw new Error('L’adresse de ' + nom + ' est vide.');
           if (!tel) return { ...site, adresse };
           const telephone = garde(tel, site.telephone);
-          if (!telValide(telephone)) throw new Error('Téléphone de ' + nom + ' non reconnu. Exemple : 04 91 50 01 13');
+          if (!telValide(telephone)) throw new Error('Numéro de ' + nom + ' non reconnu. Exemple : 04 91 50 01 13');
           return { ...site, adresse, telephone };
         });
         if (!communs) return { ...(donnee || {}), sites: out };
         const telephones = { ...communs };
-        champsTel.forEach(({ type, libelle, c }) => {
+        tels.forEach(({ type, libelle, c }) => {
           const num = garde(c, communs[type]);
           if (!telValide(num)) throw new Error('Numéro ' + libelle.toLowerCase() + ' non reconnu. Exemple : 04 91 50 01 13');
           telephones[type] = num;
@@ -506,11 +519,17 @@ function openEdit(carte, surPlace){
   if (lectureEnPanne(carte)){ showToast('Lecture impossible pour le moment — rechargez la page avant de modifier.'); return; }
   const origine = donnees[carte.fichier];
   const ed = fab(carte, origine);
-  edition = { carte, origine, lire: ed.lire, sale: false, n: 0 };
-  document.getElementById('editTitre').textContent = carte.action;
-  document.getElementById('editSub').textContent = carte.emplacement ? '' : carte.sub;
-  document.getElementById('editSub').hidden = !!carte.emplacement;
-  rendreEmplacement(carte.emplacement);
+  edition = { carte, origine, lire: ed.lire, sale: false, n: 0, invalide: null };
+  /* Une FEUILLE (B5) dit elle-même son titre et où elle se voit (surtitre numéroté dans l'ordre du site) ;
+     les autres éditeurs gardent l'encart « Ce que vous modifiez sur le site ». */
+  const rang = ORDRE_DU_SITE.indexOf(carte.type);
+  const sur = document.getElementById('editSur');
+  sur.textContent = ed.surtitre ? String(rang < 0 ? ORDRE_DU_SITE.length + 1 : rang + 1).padStart(2, '0') + ' · ' + ed.surtitre : '';
+  sur.hidden = !ed.surtitre;
+  document.getElementById('editTitre').textContent = ed.titre || carte.action;
+  document.getElementById('editSub').textContent = (ed.titre || carte.emplacement) ? '' : carte.sub;
+  document.getElementById('editSub').hidden = !!(ed.titre || carte.emplacement);
+  rendreEmplacement(ed.titre ? null : carte.emplacement);
   const corps = document.getElementById('editCorps');
   corps.textContent = '';
   corps.appendChild(ed.noeud);
@@ -553,8 +572,8 @@ function compterChangements(a, b, racine = true){
 function signalerSaisie(){
   if (!edition) return;
   erreurPublication = null;   // la phrase d'échec tient jusqu'au geste suivant
-  try { edition.n = compterChangements(edition.lire(), edition.origine); }
-  catch(e){ edition.n = Math.max(1, edition.n || 0); }
+  try { edition.n = compterChangements(edition.lire(), edition.origine); edition.invalide = null; }
+  catch(e){ edition.n = Math.max(1, edition.n || 0); edition.invalide = e.message; }
   edition.sale = edition.n > 0;
   majBoutonPublier();
 }
@@ -679,13 +698,26 @@ function peindrePublication(pub, ids){
 /* Le bouton de l'éditeur, selon ses changements et la publication de SON fichier. */
 function majBoutonPublier(){
   if (!edition) return;
+  majPuceEdition();
   const f = edition.carte.fichier, n = edition.sale ? edition.n : 0, pub = publications[f];
   if (pub && pub.etat === 'envoi') return peindrePublication(pub, IDS_EDITION);
   if (n === 0 && pub && pub.etat === 'envoye') return peindrePublication(pub, IDS_EDITION);
   if (n === 0 && pub && pub.etat === 'fin') return;   // le dernier centimètre, puis « ✓ C'est en ligne »
   if (n === 0 && statutPublication[f] === 'longue') etatPublier(IDS_EDITION, 'pub--repos', 'Envoyé', PHRASE_LONGUE, false);
   else if (n === 0) etatPublier(IDS_EDITION, 'pub--repos', 'Tout est en ligne', PHRASE_REPOS, false);
+  else if (edition.invalide) etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', edition.invalide, false);   // rien ne part tant que c'est faux
   else etatPublier(IDS_EDITION, 'pub--a-voir', 'Publier', erreurPublication === f ? PHRASE_ECHEC : n, true);
+}
+/* La pastille de l'éditeur (§4, barre : « ‹ Mon site » à gauche, l'état à droite). */
+function majPuceEdition(){
+  const chip = document.getElementById('editChip');
+  if (!chip || !edition) return;
+  const f = edition.carte.fichier, pub = publications[f], n = edition.sale ? edition.n : 0;
+  const enVol = pub && (pub.etat === 'envoi' || pub.etat === 'envoye');
+  const txt = n > 0 ? 'Pas encore publié' : enVol ? 'Publication…' : statutPublication[f] === 'longue' ? 'Envoyé' : 'En ligne';
+  chip.textContent = txt;
+  chip.classList.toggle('etat-chip--en-ligne', txt === 'En ligne');
+  chip.classList.toggle('etat-chip--envoi', txt !== 'En ligne');
 }
 /* La pastille de l'accueil : « Publication… » tant qu'une publication est en vol (envoi, ou envoyée sans
    preuve), « Envoyé » si la preuve tarde au-delà du délai, sinon « En ligne ». Pas de bouton sur l'accueil. */
@@ -738,7 +770,7 @@ function confirmerPublication(pub){
 function annoncerEnLigne(pub){
   const porte = boutonsDe(pub.fichier).length > 0;
   delete publications[pub.fichier];
-  majPastille();
+  majPastille(); majPuceEdition();
   if (!porte) return;
   etatPublier(IDS_EDITION, 'pub--confirme', '✓ C’est en ligne', PHRASE_EN_LIGNE, false);
   const btn = document.getElementById(IDS_EDITION.btn);

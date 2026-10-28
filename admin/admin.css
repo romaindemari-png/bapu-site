@@ -143,6 +143,35 @@ body:not(.authed) .app{display:none}
 }
 
 /* ── Édition ── */
+/* La barre de l'éditeur : « ‹ Mon site » à gauche, l'état à droite ; le surtitre dit où ça se voit (§5). */
+.edit-barre{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-4)}
+.edit-barre .retour{margin-bottom:0}
+.edit-sur{font:600 11px/1.35 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--texte-2);margin-bottom:var(--sp-2)}
+.edit-sur[hidden]{display:none}
+
+/* ── LA FEUILLE (B5, LELAB-DESIGN §4) : la section du site en papier grainé, modifiée sur place ──
+   Une ligne = un filet, sans fond ni carte ; la ligne en cours surlignée (--surlignage, rayon 10) ; le champ
+   actif souligné --violet-encre 2 px ; une ligne fausse : surlignage + message en --violet-encre. */
+.ed-feuille{display:flex;flex-direction:column;gap:var(--sp-3)}
+.feuille{background:var(--papier);color:var(--encre);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-4) var(--sp-2);display:flex;flex-direction:column;gap:var(--sp-5)}
+.f-groupe{display:flex;flex-direction:column}
+.f-titre{font:400 28px/1.05 var(--serif);letter-spacing:-.015em;margin-bottom:var(--sp-1)}
+.f-note{font-size:14px;color:var(--papier-2);margin-bottom:var(--sp-2)}
+.f-lignes{list-style:none;display:flex;flex-direction:column}
+.f-ligne{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:var(--sp-3);border-top:1px solid var(--filet);padding:6px 10px;margin:0 -10px}
+.f-ligne--adr{grid-template-columns:1fr}
+/* L'arrondi seulement sur la ligne surlignée : sur un filet, il courbait ses extrémités. */
+.f-ligne:focus-within,.f-ligne--manque{background:var(--surlignage);border-top-color:transparent;border-radius:10px}
+.f-lib{font-weight:500;font-size:15px}
+.f-champ{font:inherit;font-size:16px;width:100%;min-height:44px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--encre);padding:6px 0}
+.f-champ::placeholder{color:var(--papier-2)}
+.f-champ:focus{outline:none;border-bottom-color:var(--violet-encre)}
+.f-tel{font:400 22px/1.1 var(--serif);text-align:right}
+.f-adr{font-size:16px}
+.f-manque{display:none;grid-column:1/-1;font-size:14px;color:var(--violet-encre);font-weight:500;padding-bottom:4px}
+.f-ligne--manque .f-manque{display:block}
+.f-legende{font-size:14px;line-height:1.45;color:var(--texte-2)}
+@media (min-width:961px){ .feuille{padding:var(--sp-6) var(--sp-6) var(--sp-3)} .f-tel{font-size:24px} }
 .retour{font-size:14px;font-weight:600;color:var(--texte);padding:0 var(--sp-4);margin-bottom:var(--sp-4);min-height:44px;border:1.5px solid var(--contour);border-radius:var(--r-pill)}
 .lieu{display:flex;gap:var(--sp-3);background:var(--papier);color:var(--encre);border-radius:var(--r-md);padding:var(--sp-4);margin:var(--sp-4) 0 var(--sp-5)}
 .lieu[hidden]{display:none}

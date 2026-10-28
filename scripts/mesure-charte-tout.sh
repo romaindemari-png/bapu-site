@@ -19,6 +19,7 @@ carte message à voir (terminé)|/admin/|donnees.info = { ...donnees.info, actif
 carte message masquée|/admin/|donnees.info = { ...donnees.info, actif: false }; renderAccueil(); renderSiteCards()
 carte message à jour (fenêtre)|/admin/|donnees.info = { ...donnees.info, actif: true, type: 'popup', dateDebut: '2026-01-01', dateFin: '2099-12-31' }; renderAccueil(); renderSiteCards()
 édition coordonnées|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees'))
+feuille : numéro invalide|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees')); const t = document.querySelector('#editCorps .f-champ[data-champ="standard"]'); t.value = '12 34'; t.dispatchEvent(new Event('input', { bubbles: true }))
 édition modifiée (Publier)|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees')); const t = document.querySelectorAll('#editCorps input[type=tel]')[1]; t.value = '06 12 34 56 78'; t.dispatchEvent(new Event('input', { bubbles: true }))
 édition envoyée (remplissage)|/admin/|window.__LELAB_TEMPS = 1; openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees')); const p = debutPublication('coordonnees'); publicationEnvoyee(p, donnees.coordonnees)
 édition en ligne (jaune)|/admin/|openEdit(toutesLesCartes().find(c => c.edit === 'coordonnees')); const p = debutPublication('coordonnees'); p.etat = 'envoye'; annoncerEnLigne(p)
