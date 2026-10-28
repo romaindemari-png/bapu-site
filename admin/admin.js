@@ -13,12 +13,10 @@
 /* ── Données en mémoire ── */
 let donnees = { config: null };   // config + un fichier par carte : donnees[<fichier>]
 
-/* ── Pictos (constantes du code, jamais une donnée). Depuis B3, seul PICTOS.lieu sert : l'encart d'édition. ── */
+/* ── Pictos (constantes du code, jamais une donnée). Seul « lieu » sert : l'encart d'édition. Les clés
+   admin.picto de config.json ne sont plus lues depuis B3 (cartes sans picto) ; elles restent dans la donnée. ── */
 const PICTOS = {
-  texte:   '<path d="M4 6h16M4 10h16M4 14h10M4 18h7"/>',
-  lieu:    '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
-  message: '<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
-  defaut:  '<rect x="4" y="4" width="16" height="16" rx="3"/>'
+  lieu:    '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>'
 };
 
 /* Petit constructeur DOM — jamais d'innerHTML avec une donnée. */
