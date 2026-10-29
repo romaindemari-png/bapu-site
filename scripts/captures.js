@@ -39,6 +39,8 @@ const ECRANS = [
     const p = await b.newPage();
     await p.setViewport({ width: largeur, height: largeur > 960 ? 900 : 844, isMobile: largeur <= 960, deviceScaleFactor: 2 });
     await p.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: chromie === 'nuit' ? 'dark' : 'light' }, { name: 'prefers-reduced-motion', value: 'reduce' }]);
+    /* La chromie du client (config.json) l'emporte sur le téléphone (B7) : on pose le choix de l'appareil. */
+    await p.evaluateOnNewDocument(c => { try { localStorage.setItem('lelab_chromie', c); } catch (e) {} }, chromie);
     await p.setRequestInterception(true);
     p.on('request', r => {
       const u = new URL(r.url());

@@ -40,7 +40,8 @@ scripts/test-accueil.js             Coquille (barre, volet compte) et phrase d'a
 scripts/test-cartes.js              Les 2 cartes de Mon site (ordre, états du message, vraies adresses), captures par état
 scripts/test-publier.js             Publier à 4 états : « en ligne » seulement sur preuve (relecture du fichier public), horloge accélérée
 scripts/test-feuille-adresses.js    Feuille « Adresses & téléphones » : gestes → JSON écrit à la main ; le numéro atteint les 5 endroits du site
-scripts/test-feuille-message.js     Feuille « Message d'info » : gestes → JSON à la main ; id régénéré seulement si titre/texte changent ; bannière/fenêtre sur le site
+scripts/test-feuille-message.js     Feuille « Message d'info » : gestes → JSON à la main ; id régénéré si titre, texte ou dates changent ; bannière/fenêtre sur le site
+scripts/test-chromie.js             Chromie : config.json → "chromie", interrupteur « Nuit » (localStorage, prime), pas de flash ; logo 51 px
 js/lenis.min.js                     Lenis (vendored, ne pas modifier)
 fonts/                              Neue Machina (NM / NMI inktrap), Elms Sans — .woff2
 img/                               Photos + pictos (versions .webp + fallback)

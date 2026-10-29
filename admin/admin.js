@@ -52,6 +52,12 @@ function toutesLesCartes(){
 /* ── Chargement : config d'abord, puis les fichiers qu'elle déclare ── */
 async function loadData(){
   const config = await _json('config');
+  /* À chaque lecture de config.json, sa chromie est gardée sur l'appareil (clé à part du choix de l'utilisateur) :
+     le script de tête l'applique au chargement suivant sans masquer la page (B7). */
+  try {
+    if (config && (config.chromie === 'jour' || config.chromie === 'nuit')) localStorage.setItem('lelab_chromie_config', config.chromie);
+    else if (config) localStorage.removeItem('lelab_chromie_config');
+  } catch (e) {}
   donnees = { config };
   const fichiers = [...new Set(toutesLesCartes().map(c => c.fichier))];
   await Promise.all(fichiers.map(async f => { donnees[f] = await _json(f); }));
@@ -156,6 +162,7 @@ function ouvrirVoletCompte(){
   const v = document.getElementById('voletCompte'), a = document.getElementById('avatarInit');
   if (!v) return;
   v.hidden = false; if (a) a.setAttribute('aria-expanded', 'true');
+  majInterrupteurNuit();
 }
 function fermerVoletCompte(){
   const v = document.getElementById('voletCompte'), a = document.getElementById('avatarInit');
@@ -163,6 +170,25 @@ function fermerVoletCompte(){
   v.hidden = true; if (a) a.setAttribute('aria-expanded', 'false');
 }
 function basculerVoletCompte(){ voletCompteOuvert() ? fermerVoletCompte() : ouvrirVoletCompte(); }
+/* ═══ LA CHROMIE (B7) — « Nuit » dans le volet ═══════════════════════════════════════════════════════
+   La chromie de départ est posée par le script du <head> (choix de l'appareil → config.json → téléphone).
+   L'interrupteur change tout de suite (data-chromie) et retient le choix sur l'appareil : il prend le pas sur
+   config.json. localStorage peut lever (navigation privée, stockage bloqué) : le choix vaut alors pour la page. */
+const CLE_CHROMIE = 'lelab_chromie';
+function chromieEffective(){
+  const a = document.documentElement.dataset.chromie;
+  if (a === 'jour' || a === 'nuit') return a;
+  return matchMedia('(prefers-color-scheme: light)').matches ? 'jour' : 'nuit';
+}
+function majInterrupteurNuit(){ const i = document.getElementById('voletNuit'); if (i) i.checked = chromieEffective() === 'nuit'; }
+function choisirChromie(c){
+  document.documentElement.dataset.chromie = c;
+  document.documentElement.classList.remove('chromie-attente');
+  try { localStorage.setItem(CLE_CHROMIE, c); } catch (e) {}
+  majInterrupteurNuit();
+}
+document.addEventListener('change', e => { if (e.target && e.target.id === 'voletNuit') choisirChromie(e.target.checked ? 'nuit' : 'jour'); });
+
 /* pointerdown, pas click : le toucher dehors ferme AVANT qu'un autre geste parte. Le second toucher sur
    l'avatar est dans .compte : c'est basculerVoletCompte qui le referme. */
 document.addEventListener('pointerdown', e => {

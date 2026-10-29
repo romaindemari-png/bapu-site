@@ -76,6 +76,9 @@ html[data-chromie="jour"]{
   }
 }
 
+/* ── ATTENTE DE LA CHROMIE (B7) : posée par le script du <head> tant que la chromie du client n'est pas lue ── */
+html.chromie-attente{visibility:hidden}
+
 /* ── GRAIN — tuiles PNG 8 bits répétées, soft-light, 128 px CSS, jamais étirées ── */
 .grain-fond{position:fixed;inset:0;z-index:1;pointer-events:none;
   background:var(--grain-fond-tuile) repeat;background-size:128px;opacity:.55;mix-blend-mode:soft-light}

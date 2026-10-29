@@ -1,6 +1,7 @@
 {
   "plan": "lelab",
   "famille": "sante",
+  "chromie": "jour",
   "cabinet": {
     "nom": "BAPU Aix-Marseille",
     "prenom": "Marie-Christine",
