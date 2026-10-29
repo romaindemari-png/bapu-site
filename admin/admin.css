@@ -237,7 +237,7 @@ body:not(.authed) .app{display:none}
 .ed-etat::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--papier-2);flex:none;transform:translateY(-1px)}
 .ed-etat[data-etat="En ligne"]::before{background:var(--en-ligne);box-shadow:0 0 0 1px var(--encre)}
 .ed-etat[data-etat="Programmé"]::before{background:var(--violet-encre)}
-.pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4);background:var(--fond)}
+.pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4)}
 
 /* ── LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) : pill 58 px, un état = une couleur ──
    repos : contour, « Tout est en ligne » · modifié : à voir, « Publier » · envoi / envoyé : à voir, le jaune
