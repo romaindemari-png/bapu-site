@@ -38,6 +38,7 @@
 
   --flou-violet:var(--a-voir);    --flou-violet-alpha:.28;
   --grain-fond-tuile:url('/admin/assets/grain-sombre.png');
+  --grain-pied-tuile:url('/admin/assets/grain-pied-nuit.png');   /* grain pré-calculé du pied (scripts/gen-grain-pied.js) */
   --grain-a-voir-tuile:url('/admin/assets/grain.png');
 
   --serif:'Instrument Serif',Georgia,serif;
@@ -57,6 +58,7 @@ html[data-chromie="jour"]{
   --flou-violet:var(--violet-encre); --flou-violet-alpha:.30;
   --grain-fond-tuile:url('/admin/assets/grain.png');
   --grain-a-voir-tuile:url('/admin/assets/grain-sombre.png');
+  --grain-pied-tuile:url('/admin/assets/grain-pied-jour.png');
   color-scheme:light;
 }
 /* ── TOKENS — JOUR, suivi du téléphone (aucun choix posé). ⚠️ COPIE DU BLOC CI-DESSUS, à l'identique. ── */
@@ -72,6 +74,7 @@ html[data-chromie="jour"]{
     --flou-violet:var(--violet-encre); --flou-violet-alpha:.30;
     --grain-fond-tuile:url('/admin/assets/grain.png');
     --grain-a-voir-tuile:url('/admin/assets/grain-sombre.png');
+    --grain-pied-tuile:url('/admin/assets/grain-pied-jour.png');
     color-scheme:light;
   }
 }

@@ -66,7 +66,7 @@ body:not(.authed) .app{display:none}
 .vc-sortie{margin-top:var(--sp-2);min-height:44px;padding:0 18px;border-radius:var(--r-pill);color:var(--encre);
   border:1.5px solid var(--papier-2);font:500 14px/1 var(--sans)}
 
-.main{padding:var(--sp-4) var(--sp-4) calc(48px + env(safe-area-inset-bottom));display:flex;justify-content:center}
+.main{padding:var(--sp-4) var(--sp-4) calc(48px + env(safe-area-inset-bottom));display:flex;justify-content:center;overflow-x:clip}   /* clip, pas hidden : le verre du pied (100vw) ne crée pas de défilement */
 .screen{display:none;width:100%;max-width:576px}
 .screen.active{display:block}
 #screen-monsite{max-width:1360px}
@@ -238,6 +238,19 @@ body:not(.authed) .app{display:none}
 .ed-etat[data-etat="En ligne"]::before{background:var(--en-ligne);box-shadow:0 0 0 1px var(--encre)}
 .ed-etat[data-etat="Programmé"]::before{background:var(--violet-encre)}
 .pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4)}
+/* LE FOND DU PIED (29/10) : le fond de page a un dégradé et des taches claires (flou) ; une couleur unie ne peut pas
+   les reprendre. Le pied ne peint donc AUCUNE couleur. Son ::before est un VERRE pleine largeur de l'écran :
+   backdrop-filter (flou de ce qui passe derrière), teinte 10 % de --fond au plus, bord haut fondu par mask-image —
+   sur le ::before SEULEMENT, jamais sur le pied (il masquerait le bouton).
+   ⚠️ LE GRAIN EST PRÉ-CALCULÉ (--grain-pied-tuile, scripts/gen-grain-pied.js), en mélange NORMAL. Le pied est un groupe
+      isolé (sticky + z-index) : un grain en mix-blend-mode:soft-light n'y voyait que le verre, presque transparent,
+      et peignait le gris brut de la tuile (mesuré la nuit : luminance moyenne 36 → 70). La tuile porte déjà
+      softlight(--fond, grain) à 55 % d'alpha : sur --fond, c'est exactement le grain de la page.
+   Bouton et phrase inchangés (au-dessus : z-index:-1 dans le pied). .main en overflow-x:clip (le verre fait 100vw). */
+.pied-publier::before{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 50vw);width:100vw;z-index:-1;pointer-events:none;
+  background:var(--grain-pied-tuile) repeat 0 0/128px,color-mix(in srgb,var(--fond) 10%,transparent);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 40%);mask-image:linear-gradient(to bottom,transparent,#000 40%)}
 
 /* ── LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) : pill 58 px, un état = une couleur ──
    repos : contour, « Tout est en ligne » · modifié : à voir, « Publier » · envoi / envoyé : à voir, le jaune
