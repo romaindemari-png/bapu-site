@@ -156,7 +156,9 @@ body:not(.authed) .app{display:none}
 /* ── LA FEUILLE (B5, LELAB-DESIGN §4) : la section du site en papier grainé, modifiée sur place ──
    Une ligne = un filet, sans fond ni carte ; la ligne en cours surlignée (--surlignage, rayon 10) ; le champ
    actif souligné --violet-encre 2 px ; une ligne fausse : surlignage + message en --violet-encre. */
-.ed-feuille{display:flex;flex-direction:column;gap:var(--sp-3)}
+/* Marge basse = hauteur du pied (bouton 58 + ligne 2 × 1,45 × 14 + écarts 8 + 2 × 16 ≈ 140 px) : au repos, le contenu
+   de la feuille s'arrête au-dessus du bouton (29/10). */
+.ed-feuille{display:flex;flex-direction:column;gap:var(--sp-3);margin-bottom:140px}
 .feuille{color-scheme:light;background:var(--papier);color:var(--encre);border-radius:var(--r-lg);padding:var(--sp-4) var(--sp-4) var(--sp-2);display:flex;flex-direction:column;gap:var(--sp-5)}
 .f-groupe{display:flex;flex-direction:column}
 .f-titre{font:400 28px/1.05 var(--serif);letter-spacing:-.015em;margin-bottom:var(--sp-1)}
@@ -240,17 +242,19 @@ body:not(.authed) .app{display:none}
 .pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4)}
 /* LE FOND DU PIED (29/10) : le fond de page a un dégradé et des taches claires (flou) ; une couleur unie ne peut pas
    les reprendre. Le pied ne peint donc AUCUNE couleur. Son ::before est un VERRE pleine largeur de l'écran :
-   backdrop-filter (flou de ce qui passe derrière), teinte 10 % de --fond au plus, bord haut fondu par mask-image —
+   backdrop-filter (flou de ce qui passe derrière), teinte 80 % de --fond (à 10 %, le bouton en contour devenait illisible
+   sur le papier d'une feuille, la nuit — 29/10), bord haut fondu par mask-image sur les 56 px AU-DESSUS du pied (à 40 %
+   du pied, le texte du bouton tombait dans le fondu : 4,25:1 la nuit au chargement ; au-dessus : ≥ 4,5, contraste-pied.js) —
    sur le ::before SEULEMENT, jamais sur le pied (il masquerait le bouton).
    ⚠️ LE GRAIN EST PRÉ-CALCULÉ (--grain-pied-tuile, scripts/gen-grain-pied.js), en mélange NORMAL. Le pied est un groupe
       isolé (sticky + z-index) : un grain en mix-blend-mode:soft-light n'y voyait que le verre, presque transparent,
       et peignait le gris brut de la tuile (mesuré la nuit : luminance moyenne 36 → 70). La tuile porte déjà
       softlight(--fond, grain) à 55 % d'alpha : sur --fond, c'est exactement le grain de la page.
    Bouton et phrase inchangés (au-dessus : z-index:-1 dans le pied). .main en overflow-x:clip (le verre fait 100vw). */
-.pied-publier::before{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 50vw);width:100vw;z-index:-1;pointer-events:none;
-  background:var(--grain-pied-tuile) repeat 0 0/128px,color-mix(in srgb,var(--fond) 10%,transparent);
+.pied-publier::before{content:'';position:absolute;top:-56px;bottom:0;left:calc(50% - 50vw);width:100vw;z-index:-1;pointer-events:none;
+  background:var(--grain-pied-tuile) repeat 0 0/128px,color-mix(in srgb,var(--fond) 80%,transparent);
   -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 40%);mask-image:linear-gradient(to bottom,transparent,#000 40%)}
+  -webkit-mask-image:linear-gradient(to bottom,transparent,#000 56px);mask-image:linear-gradient(to bottom,transparent,#000 56px)}
 
 /* ── LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) : pill 58 px, un état = une couleur ──
    repos : contour, « Tout est en ligne » · modifié : à voir, « Publier » · envoi / envoyé : à voir, le jaune
