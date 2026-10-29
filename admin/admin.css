@@ -66,7 +66,7 @@ body:not(.authed) .app{display:none}
 .vc-sortie{margin-top:var(--sp-2);min-height:44px;padding:0 18px;border-radius:var(--r-pill);color:var(--encre);
   border:1.5px solid var(--papier-2);font:500 14px/1 var(--sans)}
 
-.main{padding:var(--sp-4) var(--sp-4) calc(48px + env(safe-area-inset-bottom));display:flex;justify-content:center;overflow-x:clip}   /* clip, pas hidden : le fondu du pied (100vw) ne crée pas de défilement */
+.main{padding:var(--sp-4) var(--sp-4) calc(48px + env(safe-area-inset-bottom));display:flex;justify-content:center}
 .screen{display:none;width:100%;max-width:576px}
 .screen.active{display:block}
 #screen-monsite{max-width:1360px}
@@ -238,17 +238,6 @@ body:not(.authed) .app{display:none}
 .ed-etat[data-etat="En ligne"]::before{background:var(--en-ligne);box-shadow:0 0 0 1px var(--encre)}
 .ed-etat[data-etat="Programmé"]::before{background:var(--violet-encre)}
 .pied-publier{position:sticky;bottom:0;z-index:3;display:flex;flex-direction:column;gap:8px;padding:var(--sp-4) 0 var(--sp-4);margin-top:var(--sp-4)}
-/* LE FOND DU PIED (29/10) : plus de fond uni de la largeur de la colonne (une bande sans grain ni flou, visible en jour).
-   ::before = un FONDU de transparent vers --fond, sur TOUTE la largeur de l'écran, qui commence 56 px au-dessus du
-   bouton : le texte qui défile s'efface avant de passer dessous. ::after = le GRAIN du fond (même tuile, même
-   soft-light, même opacité que .grain-fond), posé SEULEMENT là où le fondu est (presque) plein : le pied est un
-   groupe isolé (sticky + z-index), son soft-light ne voit que le fondu ; sur la partie encore transparente, il se
-   peignait en gris brut (bande sombre constatée le 29/10). Au-dessus, c'est le grain de la page qui reste visible.
-   Le contenu du pied passe au-dessus (z-index:-1 dans le pied isolé). */
-.pied-publier::before,.pied-publier::after{content:'';position:absolute;top:-56px;bottom:0;left:calc(50% - 50vw);width:100vw;z-index:-1;pointer-events:none}
-.pied-publier::before{background:linear-gradient(to bottom,transparent,var(--fond) 56px)}
-.pied-publier::after{background:var(--grain-fond-tuile) repeat;background-size:128px;opacity:.55;mix-blend-mode:soft-light;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 46px,#000 56px);mask-image:linear-gradient(to bottom,transparent 46px,#000 56px)}
 
 /* ── LE BOUTON UNIQUE (B4, LELAB-DESIGN §6) : pill 58 px, un état = une couleur ──
    repos : contour, « Tout est en ligne » · modifié : à voir, « Publier » · envoi / envoyé : à voir, le jaune
